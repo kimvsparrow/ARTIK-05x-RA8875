@@ -29,6 +29,7 @@ config LCD_MAXCONTRAST
 
 config LCD_MAXPOWER
 	int "LCD maximum power"
+	default 255 if LCD_RA8875
 	default 1
 	range 1 255
 	---help---
@@ -207,18 +208,46 @@ config LCD_RA8875
 if LCD_RA8875
 
 choice
-	prompt "MCU Interface width"
-	default LCD_RA8875_8BIT
+	prompt "MCU-RA8875 Interface"
+	default LCD_RA8875_SPI_4WIRE
 	---help---
-		Bit-width of MCU interface (8 or 16)
+		RA8875 MCU-RA8875 hardware interface
+
+config LCD_RA8875_SPI_4WIRE
+	bool "SPI 4-Wire"
+
+config LCD_RA8875_I2C
+	bool "I2C (unsupported)"
 
 config LCD_RA8875_8BIT
-	bool "8 bit"
+	bool "8 bit (unsupported)"
 
 config LCD_RA8875_16BIT
-	bool "16 bit"
+	bool "16 bit (unsupported)"
 
-endchoice # MCU Interface width
+endchoice # MCU Interface
+
+if LCD_RA8875_SPI_4WIRE
+config LCD_RA8875_SPI_4WIRE_BUS
+	int "RA8875 SPI bus number"
+	range 0 1
+	default 0
+
+config LCD_RA8875_PWRITE_BUFFER_SIZE
+	int "RA8875 SPI mode pwrite buffer size in bytes (0 to disable)"
+	range 0 4096
+	default 256
+	---help---
+		May allow more efficient use of the SPI FIFO
+endif
+
+config RA8875_XRES
+	int "RA8875 display width in pixels"
+	default 800
+
+config RA8875_YRES
+	int "RA8875 display height in pixels"
+	default 480
 
 choice
 	prompt "Colors"
