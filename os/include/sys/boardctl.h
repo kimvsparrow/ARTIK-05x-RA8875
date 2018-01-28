@@ -102,12 +102,20 @@
  * ARG:           A writable array of size CONFIG_BOARDCTL_UNIQUEID_SIZE in
  *                which to receive the board unique ID.
  * DEPENDENCIES:  Board logic must provide the board_uniqueid() interface.
+ *
+ * CMD:           BOARDIOC_NX_START
+ * DESCRIPTION:   Start the NX server
+ * ARG:           None
+ * CONFIGURATION: CONFIG_NX
+ * DEPENDENCIES:  Base graphics logic provides nx_start()
+ *
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
 #define BOARDIOC_POWEROFF          _BOARDIOC(0x0002)
 #define BOARDIOC_RESET             _BOARDIOC(0x0003)
 #define BOARDIOC_UNIQUEID          _BOARDIOC(0x0004)
+#define BOARDIOC_NX_START          _BOARDIOC(0x0005)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -117,6 +125,30 @@
  */
 
 #define BOARDIOC_USER              _BOARDIOC(0x000d)
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/* Structure used to pass arguments and get returned values from the
+ * BOARDIOC_GRAPHICS_SETUP command.
+ */
+
+#ifdef CONFIG_NX_LCDDRIVER
+struct lcd_dev_s;                /* Forward reference */
+#else
+struct fb_vtable_s;              /* Forward reference */
+#endif
+
+struct boardioc_graphics_s
+{
+  int devno;                     /* IN: Graphics device number */
+#ifdef CONFIG_NX_LCDDRIVER
+  FAR struct lcd_dev_s *dev;     /* OUT: LCD driver instance */
+#else
+  FAR struct fb_vtable_s *dev;   /* OUT: Framebuffer driver instance */
+#endif
+};
 
 /****************************************************************************
  * Public Data

@@ -62,6 +62,7 @@
 #include <assert.h>
 
 #include <tinyara/board.h>
+#include <tinyara/nx/nx.h>
 
 #ifdef CONFIG_LIB_BOARDCTL
 /****************************************************************************
@@ -160,6 +161,21 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 	case BOARDIOC_UNIQUEID:
 		ret = board_uniqueid((FAR uint8_t *)arg);
 		break;
+#endif
+
+#ifdef CONFIG_NX
+      /* CMD:           BOARDIOC_NX_START
+       * DESCRIPTION:   Start the NX servier
+       * ARG:           None
+       * CONFIGURATION: CONFIG_NX
+       * DEPENDENCIES:  Base graphics logic provides nx_start()
+       */
+
+      case BOARDIOC_NX_START:
+        {
+          ret = nx_start();
+        }
+        break;
 #endif
 
 	default:

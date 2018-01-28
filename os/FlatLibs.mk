@@ -138,6 +138,15 @@ else
 TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libfs$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libdrivers$(LIBEXT)
 endif
 
+# Add libraries for the NX graphics sub-system
+
+ifeq ($(CONFIG_NX),y)
+TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libgraphics$(LIBEXT)
+TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libnx$(LIBEXT)
+else ifeq ($(CONFIG_NXFONTS),y)
+TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libnx$(LIBEXT)
+endif
+
 # Add libraries for the Audio sub-system
 
 ifeq ($(CONFIG_AUDIO),y)

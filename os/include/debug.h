@@ -376,6 +376,24 @@ Once LOGM is approved, each module should have its own index
 #define dmallvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_LCD_ERROR
+#  define lcderr(format, ...)     dbg(format, ##__VA_ARGS__)
+#else
+#  define lcderr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LCD_WARN
+#  define lcdwarn(format, ...)   wdbg(format, ##__VA_ARGS__)
+#else
+#  define lcdwarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_LCD_INFO
+#  define lcdinfo(format, ...)   vdbg(format, ##__VA_ARGS__)
+#else
+#  define lcdinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_NET_ERROR
 #define ndbg(format, ...)    dbg(format, ##__VA_ARGS__)
 #define nlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
@@ -549,25 +567,31 @@ Once LOGM is approved, each module should have its own index
 #ifdef CONFIG_DEBUG_GRAPHICS_ERROR
 #define gdbg(format, ...)    dbg(format, ##__VA_ARGS__)
 #define glldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+#define gerr(format, ...)     dbg(format, ##__VA_ARGS__)
 #else
 #define gdbg(x...)
 #define glldbg(x...)
+#define gerr(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_WARN
 #define gwdbg(format, ...)    wdbg(format, ##__VA_ARGS__)
 #define gllwdbg(format, ...)  llwdbg(format, ##__VA_ARGS__)
+#define gwarn(format, ...)   wdbg(format, ##__VA_ARGS__)
 #else
 #define gwdbg(x...)
 #define gllwdbg(x...)
+#define gwarn(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS_INFO
 #define gvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
 #define gllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#define ginfo(format, ...)   vdbg(format, ##__VA_ARGS__)
 #else
 #define gvdbg(x...)
 #define gllvdbg(x...)
+#define ginfo(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB_ERROR

@@ -63,6 +63,12 @@ libc$(DELIM)libkc$(LIBEXT): context
 $(LIBRARIES_DIR)$(DELIM)libkc$(LIBEXT): libc$(DELIM)libkc$(LIBEXT)
 	$(Q) install $(LIB_DIR)$(DELIM)libc$(DELIM)libkc$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libkc$(LIBEXT)
 
+libnx$(DELIM)libknx$(LIBEXT): context
+	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libknx$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+$(LIBRARIES_DIR)$(DELIM)libknx$(LIBEXT): libnx$(DELIM)libknx$(LIBEXT)
+	$(Q) install libnx$(DELIM)libknx$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libknx$(LIBEXT)
+
 mm$(DELIM)libkmm$(LIBEXT): context
 	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libkmm$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 
@@ -117,6 +123,12 @@ drivers$(DELIM)libdrivers$(LIBEXT): context
 $(LIBRARIES_DIR)$(DELIM)libdrivers$(LIBEXT): drivers$(DELIM)libdrivers$(LIBEXT)
 	$(Q) install drivers$(DELIM)libdrivers$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libdrivers$(LIBEXT)
 
+graphics$(DELIM)libgraphics$(LIBEXT): context
+	$(Q) $(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+$(LIBRARIES_DIR)$(DELIM)libgraphics$(LIBEXT): graphics$(DELIM)libgraphics$(LIBEXT)
+	$(Q) install graphics$(DELIM)libgraphics$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libgraphics$(LIBEXT)
+
 # Special case
 
 syscall$(DELIM)libstubs$(LIBEXT): context
@@ -132,6 +144,12 @@ libc$(DELIM)libuc$(LIBEXT): context
 
 $(LIBRARIES_DIR)$(DELIM)libuc$(LIBEXT): libc$(DELIM)libuc$(LIBEXT)
 	$(Q) install $(LIB_DIR)$(DELIM)libc$(DELIM)libuc$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libuc$(LIBEXT)
+
+libnx$(DELIM)libunx$(LIBEXT): context
+	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libunx$(LIBEXT) KERNEL=n
+
+$(LIBRARIES_DIR)$(DELIM)libunx$(LIBEXT): libnx$(DELIM)libunx$(LIBEXT)
+	$(Q) install libnx$(DELIM)libunx$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libunx$(LIBEXT)
 
 mm$(DELIM)libumm$(LIBEXT): context
 	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT) KERNEL=n
@@ -237,6 +255,12 @@ libc$(DELIM)libc$(LIBEXT): context
 
 $(LIBRARIES_DIR)$(DELIM)libc$(LIBEXT): libc$(DELIM)libc$(LIBEXT)
 	$(Q) install $(LIB_DIR)$(DELIM)libc$(DELIM)libc$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libc$(LIBEXT)
+
+libnx$(DELIM)libnx$(LIBEXT): context
+	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libnx$(LIBEXT)
+
+$(LIBRARIES_DIR)$(DELIM)libnx$(LIBEXT): libnx$(DELIM)libnx$(LIBEXT)
+	$(Q) install libnx$(DELIM)libnx$(LIBEXT) $(LIBRARIES_DIR)$(DELIM)libnx$(LIBEXT)
 
 mm$(DELIM)libmm$(LIBEXT): context
 	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)

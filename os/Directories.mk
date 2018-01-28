@@ -159,6 +159,17 @@ else
 OTHERDIRS += syscall
 endif
 
+ifeq ($(CONFIG_NX),y)
+NONFSDIRS += graphics libnx
+CONTEXTDIRS += graphics libnx
+else ifeq ($(CONFIG_NXFONTS),y)
+NONFSDIRS += libnx
+CONTEXTDIRS += libnx
+OTHERDIRS += graphics
+else
+OTHERDIRS += graphics libnx
+endif
+
 ifeq ($(CONFIG_AUDIO),y)
 NONFSDIRS += audio
 else

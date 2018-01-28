@@ -485,6 +485,37 @@ config DEBUG_FS_INFO
 
 endif #DEBUG_FS
 
+config DEBUG_GRAPHICS
+	bool "Graphics Debug Features"
+	default n
+	---help---
+		Enable NX graphics subsystem debug features.
+
+if DEBUG_GRAPHICS
+
+config DEBUG_GRAPHICS_ERROR
+	bool "Graphics Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable NX graphics subsystem error output to SYSLOG.
+
+config DEBUG_GRAPHICS_WARN
+	bool "Graphics Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable NX graphics subsystem warning output to SYSLOG.
+
+config DEBUG_GRAPHICS_INFO
+	bool "Graphics Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable NX graphics subsystem informational output to SYSLOG.
+
+endif # DEBUG_GRAPHICS
+
 config DEBUG_LIB
 	bool "C Library Debug Output"
 	default n
@@ -1004,6 +1035,11 @@ endmenu
 
 menu "Arastorage"
 source "$FRAMEWORK_DIR/src/arastorage/Kconfig"
+endmenu
+
+menu "Graphics Support"
+source graphics/Kconfig
+source libnx/Kconfig
 endmenu
 
 menu "Memory Management"

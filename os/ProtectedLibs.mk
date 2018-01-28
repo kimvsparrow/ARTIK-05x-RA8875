@@ -140,4 +140,15 @@ ifneq ($(APPDIR),)
 USERLIBS += $(LIBRARIES_DIR)$(DELIM)libapps$(LIBEXT)
 endif
 
+# Add libraries for the NX graphics sub-system
+
+ifeq ($(CONFIG_NX),y)
+TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libgraphics$(LIBEXT)
+TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libknx$(LIBEXT)
+USERLIBS  += $(LIBRARIES_DIR)$(DELIM)libunx$(LIBEXT)
+else ifeq ($(CONFIG_NXFONTS),y)
+TINYARALIBS += $(LIBRARIES_DIR)$(DELIM)libknx$(LIBEXT)
+USERLIBS  += $(LIBRARIES_DIR)$(DELIM)libunx$(LIBEXT)
+endif
+
 EXPORTLIBS = $(USERLIBS)
