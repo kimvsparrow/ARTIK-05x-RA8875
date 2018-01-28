@@ -72,6 +72,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#  define _MQ_SEND(d,m,l,p)           mq_send(d,m,l,p)
+#  define _MQ_TIMEDSEND(d,m,l,p,t)    mq_timedsend(d,m,l,p,t)
+#  define _MQ_RECEIVE(d,m,l,p)        mq_receive(d,m,l,p)
+#  define _MQ_TIMEDRECIEVE(d,m,l,p,t) mq_timedreceive(d,m,l,p,t)
+#  define _MQ_GETERRNO(r)             errno
+#  define _MQ_SETERRNO(r)
+#  define _MQ_GETERRVAL(r)            (-errno)
+
 /****************************************************************************
  * Global Type Declarations
  ****************************************************************************/

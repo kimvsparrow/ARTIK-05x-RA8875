@@ -72,6 +72,18 @@
 #define SEM_PRIO_INHERIT	1
 #define SEM_PRIO_PROTECT	2
 
+#  define _SEM_INIT(s,p,c)      sem_init(s,p,c)
+#  define _SEM_DESTROY(s)       sem_destroy(s)
+#  define _SEM_WAIT(s)          sem_wait(s)
+#  define _SEM_TRYWAIT(s)       sem_trywait(s)
+#  define _SEM_TIMEDWAIT(s,t)   sem_timedwait(s,t)
+#  define _SEM_GETVALUE(s,v)    sem_getvalue(s,v)
+#  define _SEM_POST(s)          sem_post(s)
+#  define _SEM_GETPROTOCOL(s,p) sem_getprotocol(s,p)
+#  define _SEM_SETPROTOCOL(s,p) sem_setprotocol(s,p)
+#  define _SEM_ERRNO(r)         errno
+#  define _SEM_ERRVAL(r)        (-errno)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

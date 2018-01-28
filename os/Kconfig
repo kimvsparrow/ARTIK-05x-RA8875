@@ -510,7 +510,7 @@ config DEBUG_GRAPHICS_WARN
 config DEBUG_GRAPHICS_INFO
 	bool "Graphics Informational Output"
 	default n
-	depends on DEBUG_INFO
+	depends on DEBUG_VERBOSE
 	---help---
 		Enable NX graphics subsystem informational output to SYSLOG.
 
@@ -871,6 +871,40 @@ config DEBUG_PAGING
 		Enable demand paging debug SYSLOG output (disabled by default)
 
 comment "Driver Debug Options"
+
+config DEBUG_LCD
+	bool "Low-level LCD Debug Features"
+	default n
+	depends on LCD
+	---help---
+		Enable LCD driver debug features.
+
+		Support for this debug option is board-specific and may not
+		be available for some boards.
+if DEBUG_LCD
+
+config DEBUG_LCD_ERROR
+	bool "LCD Driver Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable LCD driver error output to SYSLOG.
+
+config DEBUG_LCD_WARN
+	bool "LCD Driver Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable LCD driver warning output to SYSLOG.
+
+config DEBUG_LCD_INFO
+	bool "LCD Driver Informational Output"
+	default n
+	depends on DEBUG_VERBOSE
+	---help---
+		Enable LCD driver informational output to SYSLOG.
+
+endif # DEBUG_LCD
 
 config DEBUG_PWM
 	bool "PWM Debug Output"
