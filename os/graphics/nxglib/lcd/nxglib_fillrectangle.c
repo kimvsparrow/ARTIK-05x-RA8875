@@ -74,12 +74,18 @@ void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
    NXGL_PIXEL_T color)
 {
   unsigned int ncols;
+#ifndef CONFIG_LCD_RA8875
   unsigned int row;
+#endif
 
   /* Get the dimensions of the rectange to fill in pixels */
 
   ncols  = rect->pt2.x - rect->pt1.x + 1;
 
+#ifdef CONFIG_LCD_RA8875
+  ra8875_drawrectangle(NULL, rect->pt1.x, rect->pt1.y, ncols, rect->pt2.y - rect->pt1.y + 1,
+      color, true);
+#else
   /* Fill the run buffer with the selected color */
 
   NXGL_FUNCNAME(nxgl_fillrun, NXGLIB_SUFFIX)((NXGLIB_RUNTYPE *)pinfo->buffer, color, ncols);
@@ -92,4 +98,5 @@ void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
 
       (void)pinfo->putrun(row, rect->pt1.x, pinfo->buffer, ncols);
     }
+#endif
 }

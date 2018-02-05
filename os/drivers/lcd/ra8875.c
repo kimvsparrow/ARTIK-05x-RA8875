@@ -99,6 +99,8 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
+#define RA8875_DEV(lcd_dev) (lcd_dev != NULL ? (FAR struct ra8875_dev_s *)lcd_dev : &g_lcddev)
+
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
@@ -1173,7 +1175,7 @@ void ra8875_clear(FAR struct lcd_dev_s *dev, uint16_t color)
 void ra8875_drawrectangle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,
                           uint16_t width, uint16_t height, uint16_t color, bool fill)
 {
-  FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
+  FAR struct ra8875_dev_s *priv = RA8875_DEV(dev);
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = RA8875_DCR_SQUARE;
@@ -1259,7 +1261,7 @@ void ra8875_drawrectangle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,
 void ra8875_drawline(FAR struct lcd_dev_s *dev, uint16_t x1, uint16_t y1, uint16_t x2,
                      uint16_t y2, uint16_t color)
 {
-  FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
+  FAR struct ra8875_dev_s *priv = RA8875_DEV(dev);
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = RA8875_DCR_LINE;
@@ -1317,7 +1319,7 @@ void ra8875_drawline(FAR struct lcd_dev_s *dev, uint16_t x1, uint16_t y1, uint16
 void ra8875_drawtriangle(FAR struct lcd_dev_s *dev, uint16_t x0, uint16_t y0, uint16_t x1,
                          uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, bool fill)
 {
-  FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
+  FAR struct ra8875_dev_s *priv = RA8875_DEV(dev);
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = RA8875_DCR_TRIANGLE;
@@ -1389,7 +1391,7 @@ void ra8875_drawtriangle(FAR struct lcd_dev_s *dev, uint16_t x0, uint16_t y0, ui
 void ra8875_drawcircle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y, uint8_t radius,
                        uint16_t color, bool fill)
 {
-  FAR struct ra8875_dev_s *priv = (FAR struct ra8875_dev_s *)dev;
+  FAR struct ra8875_dev_s *priv = RA8875_DEV(dev);
   FAR struct ra8875_lcd_s *lcd  = priv->lcd;
 
   uint8_t draw_cmd = 0;
