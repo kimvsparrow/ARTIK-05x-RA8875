@@ -232,14 +232,7 @@ config LCD_RA8875_SPI_4WIRE_BUS
 	int "RA8875 SPI bus number"
 	range 0 1
 	default 0
-
-config LCD_RA8875_PWRITE_BUFFER_SIZE
-	int "RA8875 SPI mode pwrite buffer size in bytes (0 to disable)"
-	range 0 4096
-	default 256
-	---help---
-		May allow more efficient use of the SPI FIFO
-endif
+endif # LCD_RA8875_SPI_4WIRE
 
 config RA8875_XRES
 	int "RA8875 display width in pixels"
@@ -278,5 +271,12 @@ config LCD_RA8875_EXTENDED
 		ra8875_drawline() interfaces are always built and available for use
 		because within the OS because these are used internally by the
 		driver anyway.
+
+config LCD_RA8875_RESET
+	bool "Perform RA8875 software reset"
+	default n
+	---help---
+		Attempt to perform a software reset of the RA8875 chip via the PWRR
+		registers. This sequence does not seem to work (at least over SPI).
 
 endif # LCD_RA8875

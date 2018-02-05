@@ -973,9 +973,11 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
 
   /* Reset */
 
+#if defined(CONFIG_LCD_RA8875_RESET)
   ra8875_putreg(lcd, RA8875_PWRR, RA8875_PWRR_SWRESET);
   up_mdelay(100);
   ra8875_putreg(lcd, RA8875_PWRR, 0);
+#endif
 
   /* Setup the PLL config */
 
@@ -991,7 +993,7 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
 #else
   rv = RA8875_SYSR_COLOR_256;
 #endif
-#if defined(CONFIG_LCD_RA8875_8BIT)
+#if defined(CONFIG_LCD_RA8875_8BIT) || defined(CONFIG_LCD_RA8875_SPI_4WIRE) || defined(CONFIG_LCD_RA8875_I2C)
   rv |= RA8875_SYSR_MCUIF_8BIT;
 #elif defined(CONFIG_LCD_RA8875_16BIT)
   rv |= RA8875_SYSR_MCUIF_16BIT;

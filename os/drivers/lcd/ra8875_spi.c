@@ -44,14 +44,13 @@ static void spi_pread_finish(FAR struct ra8875_lcd_s *dev);
 
 static void ra8875_spi_command_write(uint8_t regnum);
 static void ra8875_spi_data_write(uint8_t data);
-static void ra8875_spi_data_write16(uint16_t data);
 static uint8_t ra8875_spi_data_read(void);
-static uint16_t ra8875_spi_data_read16(void);
 static uint8_t ra8875_spi_status_read(void);
 
-#define SPI_START_SPEED 3000000
-#define SPI_WRITE_SPEED 20000000
-#define SPI_READ_SPEED 10000000
+#define SPI_START_SPEED    1000000
+#define SPI_WRITE_SPEED    10000000
+#define SPI_WRITERUN_SPEED 20000000
+#define SPI_READ_SPEED     6000000
 
 #define CYCLE_START() do { SPI_SELECT(spi_device, 0, TRUE); } while (0)
 #define CYCLE_END() do { SPI_SELECT(spi_device, 0, FALSE); } while (0)
@@ -60,18 +59,6 @@ static uint8_t ra8875_spi_status_read(void);
 #define STAT_READ (3 << 6)
 #define DATA_WRITE (0 << 6)
 #define DATA_READ (1 << 6)
-
-static uint8_t cmd_write_buffer[2] = {CMD_WRITE, 0};
-static uint8_t stat_read_buffer[2] = {STAT_READ, 0};
-static uint8_t data_write_buffer[3] = {DATA_WRITE, 0, 0};
-static uint8_t data_read_buffer[3] = {DATA_READ, 0, 0};
-
-#ifdef CONFIG_LCD_RA8875_PWRITE_BUFFER_SIZE
-#define USE_PWRITE_BUFFER
-#define WRITE_BUFFER_SIZE CONFIG_LCD_RA8875_PWRITE_BUFFER_SIZE
-static uint8_t pwrite_buffer[WRITE_BUFFER_SIZE] __attribute__ ((aligned (2)));
-static size_t pwrite_buffer_index;
-#endif
 
 static struct ra8875_lcd_s ra8875_spi = {
     .write_reg = spi_write_reg,
@@ -92,9 +79,16 @@ FAR static struct lcd_dev_s *lcd_device;
 
 int board_lcd_initialize(void) {
     spi_device = init_ra8875_spi();
+    if (spi_device == NULL) {
+        return -EIO;
+    }
     lcd_device = ra8875_lcdinitialize(&ra8875_spi);
-    SPI_SETFREQUENCY(spi_device, SPI_READ_SPEED);
-    return lcd_device != NULL;
+    if (lcd_device == NULL) {
+        return -ENODEV;
+    }
+    SPI_SETFREQUENCY(spi_device, SPI_WRITE_SPEED);
+
+    return OK;
 }
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev) {
@@ -108,15 +102,16 @@ void board_lcd_uninitialize(void) {
 static FAR struct spi_dev_s *init_ra8875_spi(void) {
     struct spi_dev_s *spi;
 
-    spi = up_spiinitialize(0);
+    spi = up_spiinitialize(CONFIG_LCD_RA8875_SPI_4WIRE_BUS);
 	if (spi == NULL) {
+        lcderr("ERROR: Failed to initialize SPI for RA8875");
 		return NULL;
     }
 
 	SPI_LOCK(spi, TRUE);
+	SPI_SETFREQUENCY(spi, SPI_START_SPEED);
 	SPI_SETMODE(spi, SPIDEV_MODE0);
 	SPI_SETBITS(spi, 8);
-	SPI_SETFREQUENCY(spi, SPI_START_SPEED);
     return spi;
 }
 
@@ -127,69 +122,53 @@ static void spi_write_reg(FAR struct ra8875_lcd_s *dev, uint8_t regnum, uint8_t 
 
 static void spi_write_reg16(FAR struct ra8875_lcd_s *dev, uint8_t regnum, uint16_t data) {
     ra8875_spi_command_write(regnum);
-    ra8875_spi_data_write16(data);
+    ra8875_spi_data_write(data & 0xff);
+    ra8875_spi_command_write(regnum + 1);
+    ra8875_spi_data_write(data >> 8);
 }
 
 static uint8_t spi_read_reg(FAR struct ra8875_lcd_s *dev, uint8_t regnum) {
+	SPI_SETFREQUENCY(spi_device, SPI_READ_SPEED);
     ra8875_spi_command_write(regnum);
     return ra8875_spi_data_read();
+	SPI_SETFREQUENCY(spi_device, SPI_WRITE_SPEED);
 }
 
 static uint8_t spi_read_status(FAR struct ra8875_lcd_s *dev) {
+	SPI_SETFREQUENCY(spi_device, SPI_READ_SPEED);
     return ra8875_spi_status_read();
+	SPI_SETFREQUENCY(spi_device, SPI_WRITE_SPEED);
 }
 
 static void spi_pwrite_prepare(FAR struct ra8875_lcd_s *dev, uint8_t regnum) {
-    SPI_SETFREQUENCY(spi_device, SPI_WRITE_SPEED);
     ra8875_spi_command_write(regnum);
+    SPI_SETFREQUENCY(spi_device, SPI_WRITERUN_SPEED);
     CYCLE_START();
-#ifdef USE_PWRITE_BUFFER
-    pwrite_buffer_index = 0;
-#endif
 }
 
-// XXX: speed can be improved by batching SPI data for large block writes... 16 bytes?
 static void spi_pwrite_data8(FAR struct ra8875_lcd_s *dev, uint8_t data) {
-#ifdef USE_PWRITE_BUFFER
-    pwrite_buffer[pwrite_buffer_index++] = data;
-    if (pwrite_buffer_index == WRITE_BUFFER_SIZE) {
-        SPI_SNDBLOCK(spi_device, pwrite_buffer, WRITE_BUFFER_SIZE);
-        pwrite_buffer_index = 0;
-    }
-#else
-    ra8875_spi_data_write(data);
-#endif
+    SPI_SNDBLOCK(spi_device, &data, 1);
 }
 
 static void spi_pwrite_data16(FAR struct ra8875_lcd_s *dev, uint16_t data) {
-#ifdef USE_PWRITE_BUFFER
-    *(uint16_t*)(&pwrite_buffer[pwrite_buffer_index]) = data;
-    pwrite_buffer_index += 2;
-    if (pwrite_buffer_index == WRITE_BUFFER_SIZE) {
-        SPI_SNDBLOCK(spi_device, pwrite_buffer, WRITE_BUFFER_SIZE);
-        pwrite_buffer_index = 0;
-    }
-#else
-    ra8875_spi_data_write16(data);
-#endif
+    uint8_t buffer[2] = {data & 0xff, data >> 8};
+
+    SPI_SNDBLOCK(spi_device, buffer, 2);
 }
 
 static void spi_pwrite_finish(FAR struct ra8875_lcd_s *dev) {
-#ifdef USE_PWRITE_BUFFER
-    if (pwrite_buffer_index != 0) {
-        SPI_SNDBLOCK(spi_device, pwrite_buffer, pwrite_buffer_index);
-    }
-#endif
     CYCLE_END();
-    SPI_SETFREQUENCY(spi_device, SPI_READ_SPEED);
+    SPI_SETFREQUENCY(spi_device, SPI_WRITE_SPEED);
 }
 
 static void spi_pread_prepare(FAR struct ra8875_lcd_s *dev, uint8_t regnum) {
-    uint8_t read_block[2];
+    uint8_t write_block[1] = { DATA_READ };
+    uint8_t read_block[1];
 
     ra8875_spi_command_write(regnum);
+	SPI_SETFREQUENCY(spi_device, SPI_READ_SPEED);
     CYCLE_START();
-    SPI_EXCHANGE(spi_device, data_read_buffer, read_block, 2);
+    SPI_EXCHANGE(spi_device, write_block, read_block, 1);
 }
 
 static uint16_t spi_pread_data16(FAR struct ra8875_lcd_s *dev) {
@@ -201,51 +180,41 @@ static uint16_t spi_pread_data16(FAR struct ra8875_lcd_s *dev) {
 
 static void spi_pread_finish(FAR struct ra8875_lcd_s *dev) {
     CYCLE_END();
+	SPI_SETFREQUENCY(spi_device, SPI_WRITE_SPEED);
 }
 
-
 static void ra8875_spi_command_write(uint8_t regnum) {
-    cmd_write_buffer[1] = regnum;
+    uint8_t write_block[2] = { CMD_WRITE, regnum };
+
     CYCLE_START();
-    SPI_SNDBLOCK(spi_device, cmd_write_buffer, 2);
+    SPI_SNDBLOCK(spi_device, write_block, 2);
     CYCLE_END();
 }
 
 static void ra8875_spi_data_write(uint8_t data) {
-    data_write_buffer[1] = data;
-    CYCLE_START();
-    SPI_SNDBLOCK(spi_device, data_write_buffer, 2);
-    CYCLE_END();
-}
+    uint8_t write_block[2] = { DATA_WRITE, data };
 
-static void ra8875_spi_data_write16(uint16_t data) {
-    data_write_buffer[1] = data & 0xff;
-    data_write_buffer[2] = data >> 8;
     CYCLE_START();
-    SPI_SNDBLOCK(spi_device, data_write_buffer, 3);
+    SPI_SNDBLOCK(spi_device, write_block, 2);
     CYCLE_END();
 }
 
 static uint8_t ra8875_spi_data_read(void) {
+    uint8_t write_block[2] = { DATA_READ, 0 };
     uint8_t read_block[2];
+
     CYCLE_START();
-    SPI_EXCHANGE(spi_device, data_read_buffer, read_block, 2);
+    SPI_EXCHANGE(spi_device, write_block, read_block, 2);
     CYCLE_END();
     return read_block[1];
 }
 
-static uint16_t ra8875_spi_data_read16(void) {
-    uint8_t read_block[3];
-    CYCLE_START();
-    SPI_EXCHANGE(spi_device, data_read_buffer, read_block, 3);
-    CYCLE_END();
-    return (read_block[2] << 8) | read_block[1];
-}
-
 static uint8_t ra8875_spi_status_read(void) {
+    uint8_t write_block[2] = { STAT_READ, 0 };
     uint8_t read_block[2];
+
     CYCLE_START();
-    SPI_EXCHANGE(spi_device, stat_read_buffer, read_block, 2);
+    SPI_EXCHANGE(spi_device, write_block, read_block, 2);
     CYCLE_END();
     return read_block[1];
 }
