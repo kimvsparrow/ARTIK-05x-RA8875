@@ -128,30 +128,32 @@ Revision: $Rev: 3809 $
 #  define OS_TRACE_ID_MUTEX_DEL                       (10u + OS_TRACE_ID_OFFSET)
 #  define OS_TRACE_ID_MUTEX_POST                      (11u + OS_TRACE_ID_OFFSET)
 #  define OS_TRACE_ID_MUTEX_PEND                      (12u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MUTEX_TASK_PRIO_INHERIT         (13u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MUTEX_TASK_PRIO_DISINHERIT      (14u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_TASK_PRIORITY                   (13u + OS_TRACE_ID_OFFSET)
 #  define OS_TRACE_ID_SEM_CREATE                      (15u + OS_TRACE_ID_OFFSET)
 #  define OS_TRACE_ID_SEM_DEL                         (16u + OS_TRACE_ID_OFFSET)
 #  define OS_TRACE_ID_SEM_POST                        (17u + OS_TRACE_ID_OFFSET)
 #  define OS_TRACE_ID_SEM_WAIT                        (18u + OS_TRACE_ID_OFFSET)
 #  define OS_TRACE_ID_SEM_TIMEWAIT                    (19u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MSGQ_OPEN                       (20u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MSGQ_CLOSE                      (21u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MSGQ_SEND                       (22u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MSGQ_RECV                       (23u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_FLAG_CREATE                     (24u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_FLAG_DEL                        (25u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_FLAG_POST                       (26u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_FLAG_PEND                       (27u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MEM_CREATE                      (28u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MEM_ALLOC                       (29u + OS_TRACE_ID_OFFSET)
-#  define OS_TRACE_ID_MEM_FREE                        (30u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_SEM_ADDHOLDER                   (20u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_SEM_DELHOLDER                   (21u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_MSGQ_OPEN                       (22u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_MSGQ_CLOSE                      (23u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_MSGQ_SEND                       (24u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_MSGQ_RECV                       (25u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_FLAG_CREATE                     (26u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_FLAG_DEL                        (27u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_FLAG_POST                       (28u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_FLAG_PEND                       (29u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_MEM_CREATE                      (30u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_MEM_ALLOC                       (31u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_MEM_FREE                        (32u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_ANNOTATION_MSG                  (50u + OS_TRACE_ID_OFFSET)
+#  define OS_TRACE_ID_ANNOTATION_VALUE                (51u + OS_TRACE_ID_OFFSET)
 #else  /* CONFIG_SYSVIEW */
 #  define  OS_TRACE_INIT()
 #  define  OS_TRACE_START()
 #  define  OS_TRACE_STOP()
 #endif /* CONFIG_SYSVIEW */
-
 
 #ifdef CONFIG_SYSVIEW_MONITOR_TASK
 #  define OS_TRACE_TASK_CREATE(p_tcb)                 if (p_tcb != 0) {                               \
@@ -180,6 +182,7 @@ Revision: $Rev: 3809 $
 #  define OS_TRACE_TASK_SUSPEND(p_tcb)
 #  define OS_TRACE_TASK_SUSPENDED(p_tcb)                        SYSVIEW_TaskSuspend((U32)p_tcb->pid)
 #  define OS_TRACE_TASK_RESUME(p_tcb)                           SYSVIEW_TaskReady((U32)p_tcb->pid)
+#  define OS_TRACE_TASK_PRIORITY(p_tcb, _old, _new)             SEGGER_SYSVIEW_RecordU32x3(OS_TRACE_ID_TASK_PRIORITY,              SEGGER_SYSVIEW_ShrinkId((U32)p_tcb->pid),   (U32)_old, (U32)_new                             )
 #else
 #  define OS_TRACE_TASK_CREATE(p_tcb)
 #  define OS_TRACE_TASK_UPDATE(p_tcb)
@@ -190,6 +193,7 @@ Revision: $Rev: 3809 $
 #  define OS_TRACE_TASK_SUSPENDED(p_tcb)
 #  define OS_TRACE_TASK_RESUME(p_tcb)
 #  define OS_TRACE_TASK_DEL(p_tcb)
+#  define OS_TRACE_TASK_PRIORITY(p_tcb, _old, _new)
 #endif
 
 #ifdef CONFIG_SYSVIEW_MONITOR_INTERRUPT
@@ -209,17 +213,25 @@ Revision: $Rev: 3809 $
 #endif
 
 #ifdef CONFIG_SYSVIEW_MONITOR_SEMAPHORE
-#  define OS_TRACE_SEM_CREATE(p_sem, p_name)
-#  define OS_TRACE_SEM_DEL(p_sem, p_calleraddr)                 SEGGER_SYSVIEW_RecordU32x2(OS_TRACE_ID_SEM_DEL,                    (U32)p_sem,        (U32)p_calleraddr                    )
-#  define OS_TRACE_SEM_POST(p_sem, p_calleraddr)                SEGGER_SYSVIEW_RecordU32x2(OS_TRACE_ID_SEM_POST,                   (U32)p_sem,        (U32)p_calleraddr                    )
-#  define OS_TRACE_SEM_WAIT(p_sem, p_calleraddr)                SEGGER_SYSVIEW_RecordU32x2(OS_TRACE_ID_SEM_WAIT,                   (U32)p_sem,        (U32)p_calleraddr                    )
-#  define OS_TRACE_SEM_TIMEWAIT(p_sem, timeout, p_calleraddr)   SEGGER_SYSVIEW_RecordU32x3(OS_TRACE_ID_SEM_TIMEWAIT,               (U32)p_sem,        (U32)timeout,       (U32)p_calleraddr)
+#  define OS_TRACE_SEM_CREATE(p_sem, p_name)                    SYSVIEW_RecordU32Register(OS_TRACE_ID_SEM_CREATE,                  ((U32)p_sem),      p_name                                                                    )
+#  define OS_TRACE_SEM_DEL(p_sem, p_calleraddr)                 if (p_sem->trace) SEGGER_SYSVIEW_RecordU32x2(OS_TRACE_ID_SEM_DEL,                    (U32)p_sem,        (U32)p_calleraddr                                       )
+#  define OS_TRACE_SEM_POST_ENTER(p_sem, p_calleraddr)          if (p_sem->trace) SEGGER_SYSVIEW_RecordU32x2(OS_TRACE_ID_SEM_POST,                   (U32)p_sem,        (U32)p_calleraddr                                       )
+#  define OS_TRACE_SEM_WAIT_ENTER(p_sem, p_calleraddr)          if (p_sem->trace) SEGGER_SYSVIEW_RecordU32x2(OS_TRACE_ID_SEM_WAIT,                   (U32)p_sem,        (U32)p_calleraddr                                       )
+#  define OS_TRACE_SEM_TIMEWAIT(p_sem, timeout, p_calleraddr)   if (p_sem->trace) SEGGER_SYSVIEW_RecordU32x3(OS_TRACE_ID_SEM_TIMEWAIT,               (U32)p_sem,        (U32)timeout,       (U32)p_calleraddr                   )
+#  define OS_TRACE_SEM_POST_EXIT(p_sem, RetVal)                 if (p_sem->trace) SEGGER_SYSVIEW_RecordEndCallU32x2(OS_TRACE_ID_SEM_POST,            (U32)p_sem,        RetVal)
+#  define OS_TRACE_SEM_WAIT_EXIT(p_sem, RetVal)                 if (p_sem->trace) SEGGER_SYSVIEW_RecordEndCallU32x2(OS_TRACE_ID_SEM_WAIT,            (U32)p_sem,        RetVal)
+#  define OS_TRACE_SEM_ADDHOLDER(p_sem, p_tcb, holder_counts)        if (p_sem->trace) SEGGER_SYSVIEW_RecordU32x3(OS_TRACE_ID_SEM_ADDHOLDER, (U32)p_sem, SEGGER_SYSVIEW_ShrinkId((U32)p_tcb->pid), (U32)holder_counts)
+#  define OS_TRACE_SEM_DELHOLDER(p_sem, p_tcb, holder_counts)        if (p_sem->trace) SEGGER_SYSVIEW_RecordU32x3(OS_TRACE_ID_SEM_DELHOLDER, (U32)p_sem, SEGGER_SYSVIEW_ShrinkId((U32)p_tcb->pid), (U32)holder_counts)
 #else
 #  define OS_TRACE_SEM_CREATE(p_sem, p_name)
 #  define OS_TRACE_SEM_DEL(p_sem, p_calleraddr)
-#  define OS_TRACE_SEM_POST(p_sem, p_calleraddr)
-#  define OS_TRACE_SEM_WAIT(p_sem, p_calleraddr)
+#  define OS_TRACE_SEM_POST_ENTER(p_sem, p_calleraddr)
+#  define OS_TRACE_SEM_WAIT_ENTER(p_sem, p_calleraddr)
+#  define OS_TRACE_SEM_POST_EXIT(p_sem, RetVal)
+#  define OS_TRACE_SEM_WAIT_EXIT(p_sem, RetVal)
 #  define OS_TRACE_SEM_TIMEWAIT(p_sem, timeout, p_calleraddr)
+#  define OS_TRACE_SEM_ADDHOLDER(p_sem, p_tcb, holder_counts)
+#  define OS_TRACE_SEM_DELHOLDER(p_sem, p_tcb, holder_counts)
 #endif
 
 #ifdef CONFIG_SYSVIEW_MONITOR_MSGQ
@@ -252,6 +264,14 @@ Revision: $Rev: 3809 $
 #  endif
 #else
 #  define SYSVIEW_GET_RETADDR
+#endif
+
+#ifdef CONFIG_SYSVIEW
+#  define OS_TRACE_MSG(msg)                                       SEGGER_SYSVIEW_RecordString(OS_TRACE_ID_ANNOTATION_MSG, msg)
+#  define OS_TRACE_VALUE(value)                                     SEGGER_SYSVIEW_RecordU32(OS_TRACE_ID_ANNOTATION_VALUE, value)
+#else
+#  define OS_TRACE_MSG(msg)
+#  define OS_TRACE_VALUE(value)
 #endif
 
 /*

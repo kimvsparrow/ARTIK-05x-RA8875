@@ -40,6 +40,8 @@ config ARCH_CORTEXR4
 	default n
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
+	select ARCH_HAVE_DABORTSTACK
+	select ARCH_HAVE_THUMB
 
 config ARCH_FAMILY
 	string
@@ -74,6 +76,17 @@ config ARMV7M_CMNVECTOR
 		the common vector logic.  Some can use either their own built-in vector
 		logic or the common vector logic.  This applies only to ARMv7-M
 		architectures.
+
+config ARCH_HAVE_THUMB
+	bool
+	default n
+
+config ARCH_THUMB
+	bool "Thumb instruction set support"
+	default n
+	depends on ARCH_HAVE_THUMB
+	---help---
+		Build all in Thumb mode.
 
 config ARCH_HAVE_FPU
 	bool
@@ -143,6 +156,35 @@ config DEBUG_HARDFAULT
 		Enables verbose debug output when a hard fault is occurs.  This verbose
 		output is sometimes helpful when debugging difficult hard fault problems,
 		but may be more than you typcially want to see.
+
+choice
+	prompt "Stack Smash Protection"
+	default ARCH_STACK_SMASH_PROTECT_STRONG if ARCH_STACKDUMP
+	default ARCH_STACK_SMASH_PROTECT_NONE if !ARCH_STACKDUMP
+
+config ARCH_STACK_SMASH_PROTECT_NONE
+	bool "Suppress"
+
+config ARCH_STACK_SMASH_PROTECT_NORMAL
+	bool "Normal"
+	depends on ARCH_STACKDUMP
+
+config ARCH_STACK_SMASH_PROTECT_STRONG
+	bool "Strong"
+	depends on ARCH_STACKDUMP
+
+config ARCH_STACK_SMASH_PROTECT_ALL
+	bool "All"
+	depends on ARCH_STACKDUMP
+
+endchoice
+
+config ARCH_STACK_OVF_DETECTION
+	bool "Stack Overflow Detection"
+	depends on STACK_COLORATION
+	---help---
+		Enable the stack overflow detection. If enabled, tizenrt kernel is
+		checked stack check whenever every context switching.
 
 comment "Exception stack options"
 

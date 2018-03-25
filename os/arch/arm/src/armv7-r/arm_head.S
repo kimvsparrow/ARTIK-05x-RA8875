@@ -161,6 +161,7 @@
 	.cpu	cortex-r4f
 #endif
 	.syntax	unified
+	.arm
 	.file	"arm_head.S"
 
 /***************************************************************************
@@ -412,7 +413,7 @@ __start:
 	 * perform a destructive test, losing the pushed content of the stack.
 	 */
 
-	b		arm_boot
+	blx		arm_boot
 
 	/* .text Data */
 

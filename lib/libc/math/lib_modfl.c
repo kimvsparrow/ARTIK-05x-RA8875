@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- * Copyright 2016 Samsung Electronics All Rights Reserved.
+ * Copyright 2016-2017 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,6 @@
  * Included Files
  ************************************************************************/
 
-#include <tinyara/config.h>
-#include <tinyara/compiler.h>
-
 #include <stdint.h>
 #include <math.h>
 
@@ -59,11 +56,11 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double modfl(long double x, long double *iptr)
 {
-	if (fabs(x) >= 4503599627370496.0) {
+	if (fabsl(x) >= 4503599627370496.0) {
 		*iptr = x;
 		return 0.0;
-	} else if (fabs(x) < 1.0) {
-		*iptr = 0.0;
+	} else if (fabsl(x) < 1.0) {
+		*iptr = (x * 0.0);
 		return x;
 	} else {
 		*iptr = (long double)(int64_t)x;

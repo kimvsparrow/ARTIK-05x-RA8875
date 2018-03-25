@@ -200,9 +200,10 @@
 
 /* Special values of sigaction (all treated like NULL) */
 
-#define SIG_ERR         ((CODE void*)-1)
-#define SIG_DFL         ((CODE void*)0)
-#define SIG_IGN         ((CODE void*)0)
+#define SIG_ERR         ((_sa_handler_t)-1)
+#define SIG_DFL         ((_sa_handler_t)0)
+#define SIG_IGN         ((_sa_handler_t)0)
+#define SIG_HOLD        ((_sa_handler_t)1)   /* Used only with sigset() */
 
 /********************************************************************************
  * Global Type Declarations
@@ -296,7 +297,7 @@ extern "C" {
  * @details [SYSTEM CALL API]
  * @since Tizen RT v1.0
  */
-int kill(pid_t, int);
+int kill(pid_t pid, int sig);
 
 /**
  * @addtogroup SIGNAL_KERNEL
@@ -331,12 +332,37 @@ int sigismember(FAR const sigset_t *set, int signo);
  * @brief  POSIX APIs (refer to : http://pubs.opengroup.org/onlinepubs/9699919799/)
  * @since Tizen RT v1.0
  */
-int sighold(int signo);
+int sighold(int sig);
 /**
  * @brief  POSIX APIs (refer to : http://pubs.opengroup.org/onlinepubs/9699919799/)
  * @since Tizen RT v1.0
  */
-int sigrelse(int signo);
+int sigignore(int sig);
+/**
+ * @brief  POSIX APIs (refer to : http://pubs.opengroup.org/onlinepubs/9699919799/)
+ * @since Tizen RT v1.0
+ */
+int sigpause(int sig);
+/**
+ * @brief  POSIX APIs (refer to : http://pubs.opengroup.org/onlinepubs/9699919799/)
+ * @since Tizen RT v1.0
+ */
+int raise(int sig);
+/**
+ * @brief  POSIX APIs (refer to : http://pubs.opengroup.org/onlinepubs/9699919799/)
+ * @since Tizen RT v1.0
+ */
+int sigrelse(int sig);
+/**
+ * @brief  POSIX APIs (refer to : http://pubs.opengroup.org/onlinepubs/9699919799/)
+ * @since Tizen RT v1.0
+ */
+CODE void (*sigset(int sig, CODE void (*func)(int sig)))(int sig);
+/**
+ * @brief  POSIX APIs (refer to : http://pubs.opengroup.org/onlinepubs/9699919799/)
+ * @since Tizen RT v1.0
+ */
+CODE void (*signal(int sig, CODE void (*func)(int sig)))(int sig);
 /**
  * @} */
 

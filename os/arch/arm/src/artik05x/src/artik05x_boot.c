@@ -139,15 +139,6 @@ static void board_i2c_initialize(void)
 #endif
 }
 
-static void board_wdt_initialize(void)
-{
-#ifdef CONFIG_S5J_WATCHDOG
-	s5j_wdg_initialize(CONFIG_WATCHDOG_DEVPATH);
-
-	putreg32(0x40C, 0x80090000);
-#endif
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -215,6 +206,17 @@ void s5j_board_initialize(void)
 void board_initialize(void)
 {
 	artik05x_clear_bootcount();
+	board_wdt_initialize();
+	board_gpio_initialize();
+	board_rtc_initialize();
+	board_mct_initialize();
+	board_i2c_initialize();
+#ifdef CONFIG_S5J_PWM
+	board_pwm_initialize();
+#endif
+#ifdef CONFIG_S5J_ADC
+	artik05x_adc_initialize();
+#endif
 
 	/* Perform app-specific initialization here instaed of from the TASH. */
 	board_app_initialize();
@@ -222,14 +224,6 @@ void board_initialize(void)
 #ifdef CONFIG_SCSC_WLAN
 	slsi_driver_initialize();
 #endif
-
-#ifdef CONFIG_S5J_PWM
-	board_pwm_setup();
-#endif
-
-	board_gpio_initialize();
-	board_i2c_initialize();
-	board_wdt_initialize();
 
 #ifdef CONFIG_S5J_SSS
 	/* verify ARTIK Key */

@@ -1286,11 +1286,13 @@ void slsi_callback_thread_handler(void *param)
 		}
 	}
 	/* Close callback receiver mqueue */
-	if (mq_close(g_recv_cbmqfd) < 0) {
-		EPRINT("receiver_thread: ERROR mq_close failed\n");
-	} else {
-		DPRINT("Closed g_recv_cbmqfd mqueue \n");
-		g_recv_cbmqfd = NULL;
+	if (g_recv_cbmqfd) {
+		if (mq_close(g_recv_cbmqfd) < 0) {
+			EPRINT("receiver_thread: ERROR mq_close failed\n");
+		} else {
+			DPRINT("Closed g_recv_cbmqfd mqueue\n");
+			g_recv_cbmqfd = NULL;
+		}
 	}
 
 	VPRINT("SLSI_API pthread_exit %d \n", g_callback_thread);
@@ -1379,7 +1381,7 @@ void slsi_monitor_thread_handler(void *param)
 					switch (g_state) {
 					case SLSI_WIFIAPI_STATE_SUPPLICANT_RUNNING:
 						// Handling reconnect after remote disconnect
-						if (slsi_event_received(result, WPA_EVENT_CONNECTED)) {
+						if (slsi_event_received(result, WPA_EVENT_LINK_UP)) {
 							slsi_check_status(reason.ssid, &reason.ssid_len, reason.bssid);
 							slsi_get_network(reason.ssid, reason.ssid_len, &g_network_id);
 							g_state = SLSI_WIFIAPI_STATE_STA_CONNECTED;
@@ -1483,7 +1485,7 @@ void slsi_monitor_thread_handler(void *param)
 						break;
 					case SLSI_WIFIAPI_STATE_STA_CONNECTING: {
 						bool event_handled = FALSE;
-						if (slsi_event_received(result, WPA_EVENT_CONNECTED)) {
+						if (slsi_event_received(result, WPA_EVENT_LINK_UP)) {
 							slsi_check_status(reason.ssid, &reason.ssid_len, reason.bssid);
 							g_state = SLSI_WIFIAPI_STATE_STA_CONNECTED;
 							// connected so lets set scan interval back to limit power consumption
@@ -1533,7 +1535,7 @@ void slsi_monitor_thread_handler(void *param)
 						break;
 					}
 					case SLSI_WIFIAPI_STATE_STA_CONNECTED:
-						if (slsi_event_received(result, WPA_EVENT_DISCONNECTED)) {
+						if (slsi_event_received(result, WPA_EVENT_LINK_DOWN)) {
 							slsi_sta_disconnect_event_handler(result, &reason);
 							g_state = SLSI_WIFIAPI_STATE_SUPPLICANT_RUNNING;
 							if (g_link_down) {
@@ -1552,7 +1554,7 @@ void slsi_monitor_thread_handler(void *param)
 						}
 						break;
 					case SLSI_WIFIAPI_STATE_STA_DISCONNECTING:
-						if (slsi_event_received(result, WPA_EVENT_DISCONNECTED)) {
+						if (slsi_event_received(result, WPA_EVENT_LINK_DOWN)) {
 							slsi_sta_disconnect_event_handler(result, &reason);
 							g_state = SLSI_WIFIAPI_STATE_SUPPLICANT_RUNNING;
 							/* start by disabling all previous networks to make sure
@@ -1890,17 +1892,17 @@ static int8_t slsi_set_security(const slsi_security_config_t *sec_config, const 
 			keymgmt = WPA_PARAM_KEY_MGMT_NONE;
 		} else if (sec_config->secmode == SLSI_SEC_MODE_WEP || sec_config->secmode == SLSI_SEC_MODE_WEP_SHARED) {
 			if (slsi_get_op_mode() == SLSI_WIFI_SOFT_AP_IF) {
-				DPRINT("SLSI_API set_security - WEP in AP mode - wrong parameter\n");
+				EPRINT("SLSI_API set_security - WEP in AP mode - wrong parameter\n");
 				result = SLSI_STATUS_PARAM_FAILED;
 				goto errout;
 			}
 			keymgmt = WPA_PARAM_KEY_MGMT_WEP;
 		} else if (sec_config->secmode == SLSI_SEC_MODE_EAP) {
-			DPRINT("SLSI_API set_security - EAP - wrong parameter\n");
+			EPRINT("SLSI_API set_security - EAP - wrong parameter\n");
 			result = SLSI_STATUS_PARAM_FAILED;
 			goto errout;
 		} else if (sec_config->secmode == (SLSI_SEC_MODE_WEP | SLSI_SEC_MODE_WEP_SHARED)) {
-			DPRINT("SLSI_API set_security - " "WEP OPEN/SHARED cannot be set together - wrong parameter\n");
+			EPRINT("SLSI_API set_security - WEP OPEN/SHARED cannot be set together - wrong parameter\n");
 			result = SLSI_STATUS_PARAM_FAILED;
 			goto errout;
 		} else if (sec_config->secmode & (SLSI_SEC_MODE_WPA_MIXED | SLSI_SEC_MODE_WPA2_MIXED)) {
@@ -1943,7 +1945,7 @@ static int8_t slsi_set_security(const slsi_security_config_t *sec_config, const 
 				}
 			}
 		} else {
-			DPRINT("SLSI_API set_security - wrong parameter\n");
+			EPRINT("SLSI_API set_security - wrong parameter\n");
 			result = SLSI_STATUS_PARAM_FAILED;
 			goto errout;
 		}
@@ -1974,7 +1976,7 @@ static int8_t slsi_set_security(const slsi_security_config_t *sec_config, const 
 					if (len >= SLSI_WIFI_WEP_ASCII_KEY_MIN + 2 && len <= SLSI_WIFI_WEP_ASCII_KEY_MAX + 2) {
 						snprintf(command, WPA_COMMAND_MAX_SIZE, "%s%s %s%s", WPA_COMMAND_SET_NETWORK, network_id, WPA_PARAM_WEPKEY, sec_config->passphrase);
 					} else {
-						DPRINT("SLSI_API set_security WEP - wrong ASCII key length\n");
+						EPRINT("SLSI_API set_security WEP - wrong ASCII key length\n");
 						result = SLSI_STATUS_PARAM_FAILED;
 						goto errout;
 					}
@@ -1983,7 +1985,7 @@ static int8_t slsi_set_security(const slsi_security_config_t *sec_config, const 
 					if (len >= SLSI_WIFI_WEP_HEX_KEY_MIN && len <= SLSI_WIFI_WEP_HEX_KEY_MAX) {
 						snprintf(command, WPA_COMMAND_MAX_SIZE, "%s%s %s%s", WPA_COMMAND_SET_NETWORK, network_id, WPA_PARAM_WEPKEY, sec_config->passphrase);
 					} else {
-						DPRINT("SLSI_API set_security WEP - wrong HEX key length\n");
+						EPRINT("SLSI_API set_security WEP - wrong HEX key length\n");
 						result = SLSI_STATUS_PARAM_FAILED;
 						goto errout;
 					}
@@ -1995,7 +1997,7 @@ static int8_t slsi_set_security(const slsi_security_config_t *sec_config, const 
 				if (len >= SLSI_WIFI_WPA_ASCII_KEY_MIN && len <= SLSI_WIFI_WPA_ASCII_KEY_MAX) {
 					snprintf(command, WPA_COMMAND_MAX_SIZE, "%s%s %s\"%s\"", WPA_COMMAND_SET_NETWORK, network_id, WPA_PARAM_PSK, sec_config->passphrase);
 				} else {
-					DPRINT("SLSI_API set_security WPA - wrong key length\n");
+					EPRINT("SLSI_API set_security WPA - wrong key length\n");
 					result = SLSI_STATUS_PARAM_FAILED;
 					goto errout;
 				}
@@ -2009,7 +2011,7 @@ static int8_t slsi_set_security(const slsi_security_config_t *sec_config, const 
 				}
 			}
 		} else {
-			DPRINT("SLSI_API set_security key missing (or set but not needed)\n");
+			EPRINT("SLSI_API set_security key missing (or set but not needed)\n");
 			goto errout;
 		}
 	}
@@ -3107,6 +3109,7 @@ static uint8_t slsi_stop_supplicant(void)
 		if (mq_close(g_recv_cbmqfd) < 0) {
 			EPRINT("receiver mq_close failed\n");
 		}
+		g_recv_cbmqfd = NULL;
 	}
 	if (mq_unlink(SLSI_CALLBACK_MQUEUE) < 0) {
 		EPRINT("mq_unlink failed \n");

@@ -23,6 +23,8 @@
 #include "sched/sched.h"
 #include "up_internal.h"
 
+#include <os_trace_events_tizenrt.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -72,6 +74,8 @@ void up_schedyield(struct tcb_s *rtcb)
 		 * changes will be made when the interrupt returns.
 		 */
 
+		OS_TRACE_TASK_SWITCHED_IN(tcb);
+		__stack_chk_region(tcb);
 		up_restorestate(rtcb->xcp.regs);
 	}
 	/* Copy the exception context into the TCB at the (old) head of the
@@ -88,6 +92,8 @@ void up_schedyield(struct tcb_s *rtcb)
 		rtcb = (struct tcb_s *)g_readytorun.head;
 		/* Then switch contexts */
 
+		OS_TRACE_TASK_SWITCHED_IN(tcb);
+		__stack_chk_region(tcb);
 		up_fullcontextrestore(rtcb->xcp.regs);
 	}
 }

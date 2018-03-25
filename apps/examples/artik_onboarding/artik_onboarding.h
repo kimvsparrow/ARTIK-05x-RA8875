@@ -23,7 +23,9 @@
 #ifndef _ARTIK_ONBOARDING_H_
 #define _ARTIK_ONBOARDING_H_
 
-#define ONBOARDING_VERSION "1.7.1"
+#include <artik_time.h>
+
+#define ONBOARDING_VERSION "1.8.0"
 
 /*
  * Service states
@@ -40,14 +42,17 @@ extern enum ServiceState current_service_state;
 /*
  * LWM2M related exports
  */
-struct Lwm2mState {
+struct Lwm2mConfig {
 	char is_ota_update;
+	artik_time signing_time;
+	artik_time signing_time_tmp;
+	char ota_signature_verification;
 };
 
-extern struct Lwm2mState lwm2m_state;
+extern struct Lwm2mConfig lwm2m_config;
 
 artik_error StartLwm2m(bool start);
-void Lwm2mResetConfig(void);
+void Lwm2mResetConfig(bool force);
 /*
  * WiFi related exports
  */

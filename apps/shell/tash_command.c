@@ -22,9 +22,6 @@
 #include <tinyara/config.h>
 #include <string.h>
 #include <stdio.h>
-#ifndef CONFIG_DISABLE_ENVIRON
-#include <stdlib.h>
-#endif
 #include <sys/types.h>
 #include <sys/boardctl.h>
 #include <apps/shell/tash.h>
@@ -89,7 +86,9 @@ struct tash_cmd_info_s {
 
 static int tash_help(int argc, char **args);
 static int tash_exit(int argc, char **args);
+#if defined(CONFIG_BOARDCTL_RESET)
 static int tash_reboot(int argc, char **argv);
+#endif
 
 /****************************************************************************
  * Private Variables
@@ -160,10 +159,7 @@ static int tash_help(int argc, char **args)
 		}
 	}
 	printf("\n");
-#ifndef CONFIG_DISABLE_ENVIRON
-	printf("\nIf you want to run an ASYNC command with specific priority and stacksize\n");
-	printf("use \"setenv %s\" or \"%s\"\n", TASH_ASYNC_CMD_PRI_STR, TASH_ASYNC_CMD_STACK_STR);
-#endif
+
 	return 0;
 }
 
@@ -203,28 +199,9 @@ static int tash_launch_cmdtask(TASH_CMD_CALLBACK cb, int argc, char **args)
 	int ret = 0;
 	int pri = TASH_CMDTASK_PRIORITY;
 	long stack_size = TASH_CMDTASK_STACKSIZE;
-#ifndef CONFIG_DISABLE_ENVIRON
-	char *env_pri;
-	char *env_stack;
-	int is_setenv = false;
 
-	env_pri = getenv(TASH_ASYNC_CMD_PRI_STR);
-	if (env_pri != NULL) {
-		pri = atoi(env_pri);
-		is_setenv = true;
-	}
+	printf("Command will be launched with pri (%d), stack size(%d)\n", pri, stack_size);
 
-	env_stack = getenv(TASH_ASYNC_CMD_STACK_STR);
-	if (env_stack != NULL) {
-		stack_size = atoi(env_stack);
-		is_setenv = true;
-	}
-
-	if (is_setenv) {
-		printf("Priority and Stack size for TASH ASYNC cmd are changed\n");
-		printf("Command will be launched with pri (%d), stack size(%d)\n", pri, stack_size);
-	}
-#endif
 	ret = task_create(args[0], pri, stack_size, cb, &args[1]);
 
 	return ret;

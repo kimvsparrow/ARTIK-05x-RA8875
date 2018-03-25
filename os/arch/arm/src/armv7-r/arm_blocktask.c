@@ -67,6 +67,8 @@
 #include "group/group.h"
 #include "up_internal.h"
 
+#include <os_trace_events_tizenrt.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -140,6 +142,8 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 			rtcb = (struct tcb_s *)g_readytorun.head;
 
 			/* Then switch contexts. */
+			OS_TRACE_TASK_SWITCHED_IN(rtcb);
+			__stack_chk_region(rtcb);
 			up_restorestate(rtcb->xcp.regs);
 		}
 
@@ -156,6 +160,8 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 			rtcb = (struct tcb_s *)g_readytorun.head;
 
 			/* Then switch contexts */
+			OS_TRACE_TASK_SWITCHED_IN(rtcb);
+			__stack_chk_region(rtcb);
 			up_fullcontextrestore(rtcb->xcp.regs);
 		}
 	}

@@ -1,3 +1,8 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
 config ARTIK05X_BOOT_FAILURE_DETECTION
 	bool "Clear bootcount when boot completes"
 	default y
@@ -151,14 +156,63 @@ config ARTIK05X_RAMMTD_MOUNT_POINT
 	default "/ramfs"
 endif
 
+if NET_SLIP
+config ARTIK05X_SLIP_DEVNAME
+	string "Device name of the serial for SLIP"
+	default "/dev/ttyS4" if S5J_UART3
+	---help---
+		Specifies the device name (/dev/ttySX) of the serial for SLIP
+endif
+
+if BOARD_CRASHDUMP
+menu "ARTIK05X crash dump configuration"
+config ARTIK05X_CRASHDUMP_BININFO
+	bool "Enable binary information dump to flash"
+	default n
+	---help---
+		If selected it will save dump information to flash.
+
+config ARTIK05X_CRASHDUMP_REG
+	bool "Enable register dump to flash"
+	default n
+	---help---
+		If selected it will dump register to flash.
+
+config ARTIK05X_CRASHDUMP_STACK
+	bool "Enable stack dump to flash"
+	default n
+	---help---
+		If selected it will dump task stack to flash.
+
+config ARTIK05X_CRASHDUMP_TCB
+	bool "Enable TCB dump to flash"
+	default n
+	---help---
+		If selected it will dump the task information to flash.
+
+config ARTIK05X_CRASHDUMP_RAM
+	bool "Enable RAM dump to flash"
+	default n
+	---help---
+		If selected it will dump the RAM contents to flash.
+endmenu #ARTIK05X crash dump configuration
+endif
+
 config ARTIK05X_SECURE
     bool
     default n
 
 if ARTIK05X_SECURE
+menu "Configure Secure tool"
 config ARTIK05X_CODESIGNER_PATH
 	string "codesigner tool path"
 	default "../build/configs/artik05x/tools/codesigner"
     ---help---
 
+config ARTIK05X_CODESIGNER_EXEC
+	string "codesigner tool executable"
+	default "artik05x_AppCodesigner"
+    ---help---
+
+endmenu
 endif

@@ -177,6 +177,8 @@ ifeq ($(CONFIG_S5J_I2S),y)
 CHIP_CSRCS += s5j_i2s.c
 endif
 
+CHIP_CSRCS += s5j_stackchk.c
+
 ifeq ($(CONFIG_S5J_SSS),y)
 VPATH += chip/sss
 CHIP_CSRCS += sss_driver_io.c	sssro_verify.c

@@ -53,11 +53,12 @@ usage() {
   cat <<EOF
 Usage: `basename $0` [OPTIONS]
 Options:
-	[--write]
-	[--flash]
+    [--write]
+    [--flash]
     [--dev[=serial]]
-	[--list[=file]]
-        [--set[="partition file"]]
+    [--list[=file]]
+    [--opt[=file]]
+    [--set[="partition file"]]
     [--exec-path[=<path>]]
     [--config-path[=<path>]]
 
@@ -76,6 +77,7 @@ Options:
                             devices.
    --dev[=serial]           Choose the device corresponding to 'serial'.
    --list[=file]            Read the list of target devices from input file.
+   --opt[=file]             Read the list of download options from input file.
    --set[=partition file]   Choose the partition what do you want.
    --exec-path[=<path..>]   Specifies the path to the executables. If you don't use this
                             option, the default path is specified.
@@ -106,37 +108,37 @@ write_serial() {
     local _dev=`echo $d | awk -F'/' '{print $2}'`
 
     tee serial_$_dev.cfg << __EOF__
-vendor_id=0x$vid	# Vendor ID
-product_id=0x$pid 	# Product ID
+vendor_id=0x$vid            # Vendor ID
+product_id=0x$pid           # Product ID
 
-max_power=500		# Max. power consumption: value * 2 mA. Use 0 if self_powered = true.
+max_power=500               # Max. power consumption: value * 2 mA. Use 0 if self_powered = true.
 
 ###########
 # Strings #
 ###########
-manufacturer="SAMSUNG"			# Manufacturer
-product="ARTIK05X"			# Product
-serial="$_dev"				# Serial
+manufacturer="SAMSUNG"      # Manufacturer
+product="ARTIK05X"          # Product
+serial="$_dev"              # Serial
 
 ###########
 # Options #
 ###########
-self_powered=false	# Turn this off for bus powered
-remote_wakeup=false	# Turn this on for remote wakeup feature
-use_serial=true		# Use the serial number string
+self_powered=false          # Turn this off for bus powered
+remote_wakeup=false         # Turn this on for remote wakeup feature
+use_serial=true             # Use the serial number string
 
 # Normally out don't have to change one of these flags
-in_is_isochronous=false		# In Endpoint is Isochronous
-out_is_isochronous=false	# Out Endpoint is Isochronous
-suspend_pull_downs=false	# Enable suspend pull downs for lower power
-change_usb_version=false	# Change USB Version
-usb_version=0		# Only used when change_usb_version is enabled
+in_is_isochronous=false     # In Endpoint is Isochronous
+out_is_isochronous=false    # Out Endpoint is Isochronous
+suspend_pull_downs=false    # Enable suspend pull downs for lower power
+change_usb_version=false    # Change USB Version
+usb_version=0               # Only used when change_usb_version is enabled
 
 ########
 # Misc #
 ########
 
-filename="eeprom_$_dev.new"	# Filename, leave empty to skip file writing
+filename="eeprom_$_dev.new" # Filename, leave empty to skip file writing
 __EOF__
 
   $EEPROMEXE --device d:$d --flash-eeprom serial_$_dev.cfg || error "FAILURE EEPROM FLASHING ($_dev)"

@@ -97,7 +97,7 @@
  * Name: lib_mode2oflags
  ****************************************************************************/
 
-static int lib_mode2oflags(FAR const char *mode)
+int lib_mode2oflags(FAR const char *mode)
 {
 	unsigned int state;
 	int oflags;
@@ -213,7 +213,7 @@ static int lib_mode2oflags(FAR const char *mode)
 
 		/* Open for exclusive access ("{r|w|a|b|+}x") */
 
-		case 'X':
+		case 'x':
 			if ((state & MODE_MASK) != MODE_NONE) {
 				/* The file is opened in exclusive mode */
 

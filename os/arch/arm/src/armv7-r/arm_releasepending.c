@@ -65,6 +65,8 @@
 #include "group/group.h"
 #include "up_internal.h"
 
+#include <os_trace_events_tizenrt.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -112,6 +114,8 @@ void up_release_pending(void)
 			/* Then switch contexts.  Any necessary address environment
 			 * changes will be made when the interrupt returns.
 			 */
+			OS_TRACE_TASK_SWITCHED_IN(rtcb);
+			__stack_chk_region(rtcb);
 			up_restorestate(rtcb->xcp.regs);
 		}
 
@@ -129,6 +133,8 @@ void up_release_pending(void)
 			rtcb = (struct tcb_s *)g_readytorun.head;
 
 			/* Then switch contexts */
+			OS_TRACE_TASK_SWITCHED_IN(rtcb);
+			__stack_chk_region(rtcb);
 			up_fullcontextrestore(rtcb->xcp.regs);
 		}
 	}

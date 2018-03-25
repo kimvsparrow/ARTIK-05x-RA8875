@@ -56,8 +56,12 @@
 DEPPATH = --dep-path .
 ASRCS =
 CSRCS = artik05x_boot.c \
-	artik05x_tash.c \
-	artik05x_pwm.c
+	artik05x_appinit.c \
+	artik05x_clock.c
+
+ifeq ($(CONFIG_S5J_PWM),y)
+CSRCS += artik05x_pwm.c
+endif
 
 ifeq ($(CONFIG_AUDIO_I2SCHAR),y)
 ifeq ($(CONFIG_S5J_I2S),y)
@@ -69,12 +73,16 @@ ifeq ($(CONFIG_AUDIO_ALC5658CHAR),y)
 CSRCS += artik05x_alc5658char.c
 endif
 
-ifeq ($(CONFIG_MTD_PROGMEM),y)
-CSRCS += artik05x_progmem.c
-endif
-
 ifeq ($(CONFIG_SCSC_WLAN),y)
 CSRCS += artik05x_wlan.c
+endif
+
+ifeq ($(CONFIG_S5J_ADC),y)
+CSRCS += artik05x_adc.c
+endif
+
+ifeq ($(CONFIG_NET_SLIP),y)
+CSRCS += artik05x_slip.c
 endif
 
 # boardctl support
@@ -82,6 +90,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 DEPPATH += --dep-path $(TOPDIR)/arch
 VPATH += :$(TOPDIR)/arch
 CSRCS += boardctl.c
+endif
+
+ifeq ($(CONFIG_BOARD_CRASHDUMP),y)
+CSRCS += artik05x_dump.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

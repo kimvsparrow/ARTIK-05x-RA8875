@@ -63,7 +63,13 @@ endif
 endif
 
 ifeq ($(CONFIG_ENABLE_IOTIVITY),y)
-IOTIVITY_RELEASE=${shell echo $(CONFIG_IOTIVITY_RELEASE_VERSION) | sed 's/"//g'}
+ifeq ($(CONFIG_IOTIVITY_RELEASE_VERSION_1_2),y)
+IOTIVITY_RELEASE=1.2-rel
+else
+ifeq ($(CONFIG_IOTIVITY_RELEASE_VERSION_1_3),y)
+IOTIVITY_RELEASE=1.3-rel
+endif
+endif
 IOTIVITY_BASE_DIR=$(EXTDIR)/iotivity/iotivity_$(IOTIVITY_RELEASE)
 endif
 
@@ -116,6 +122,7 @@ iotivity_clean:
 ifeq ($(CONFIG_ENABLE_IOTIVITY),y)
 	$(Q) echo "Cleaning IoTivity Build"
 	$(Q) TOPDIR="$(TOPDIR)" $(TOPDIR)/../external/iotivity/build_iotivity.sh clean
+	$(Q) rm -rf $(IOTIVITY_BASE_DIR)/resource/csdk/connectivity/lib/libcoap-4.1.1/*.o
 endif
 
 artiksdk_clean:

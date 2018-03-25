@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- * Copyright 2016 Samsung Electronics All Rights Reserved.
+ * Copyright 2016-2017 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,6 @@
  * Included Files
  ************************************************************************/
 
-#include <tinyara/config.h>
-#include <tinyara/compiler.h>
-
 #include <math.h>
 #include <errno.h>
 
@@ -61,7 +58,10 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double sqrt(double x)
 {
-	long double y, y1;
+	double y;
+	double y1;
+
+	/* Filter out invalid/trivial inputs */
 
 	if (x < 0.0) {
 		set_errno(EDOM);

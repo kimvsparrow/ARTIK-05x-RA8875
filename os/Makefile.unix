@@ -137,7 +137,15 @@ IOTIVITY_LIBS=release
 else
 IOTIVITY_LIBS=debug
 endif
-IOTIVITY_RELEASE=${shell echo $(CONFIG_IOTIVITY_RELEASE_VERSION) | sed 's/"//g'}
+
+ifeq ($(CONFIG_IOTIVITY_RELEASE_VERSION_1_2),y)
+IOTIVITY_RELEASE=1.2-rel
+else
+ifeq ($(CONFIG_IOTIVITY_RELEASE_VERSION_1_3),y)
+IOTIVITY_RELEASE=1.3-rel
+endif
+endif
+
 IOTIVITY_TARGET_ARCH := ${shell echo $(CONFIG_ARCH_FAMILY) | sed 's/"//g'}
 IOTIVITY_LIBS_DIR=$(EXTDIR)/iotivity/iotivity_$(IOTIVITY_RELEASE)/out/tizenrt/$(IOTIVITY_TARGET_ARCH)/$(IOTIVITY_LIBS)
 endif
@@ -304,7 +312,7 @@ tools/mkversion$(HOSTEXEEXT):
 
 $(TOPDIR)/.version: force_build
 	echo "create .version file"; \
-	tools/version.sh -v 1.0 --board "$(CONFIG_ARCH_BOARD_NAME)" .version; \
+	tools/version.sh -v 1.0.12 --board "$(CONFIG_ARCH_BOARD_NAME)" .version; \
 	chmod 755 .version
 
 include/tinyara/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
@@ -522,7 +530,7 @@ $(BIN): pass1deps pass2deps pass1 pass2
 # 		make download [ALL | BOOTLOADER | RESOURCE | KERNEL | APP]
 
 
-ifneq (,$(filter $(firstword $(MAKECMDGOALS)),download image))
+ifneq (,$(filter $(firstword $(MAKECMDGOALS)),download image crashdump))
   # use the rest as arguments for "download"
   TARGET_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   # Turn TARGET_ARGS into do-nothing targets
@@ -531,6 +539,9 @@ endif
 
 download:
 	$(call DOWNLOAD, $(TARGET_ARGS))
+
+crashdump:
+	$(call CRASHDUMP, $(TARGET_ARGS))
 
 #
 # package
