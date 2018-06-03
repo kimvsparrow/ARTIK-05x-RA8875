@@ -65,9 +65,9 @@ static pthread_addr_t start_websocket(pthread_addr_t arg)
 {
 	StartMDNSService(false);
 	StartWebServer(false, API_SET_CLOUD);
-	if (StartCloudWebsocket(true) == S_OK)
+	if (StartCloudWebsocket(true, NULL) == S_OK)
 		printf("ARTIK Cloud connection started\n");
-	if (StartLwm2m(true) == S_OK)
+	if (StartLwm2m(true, NULL) == S_OK)
 		printf("LWM2M connection started\n");
 
 	return NULL;
@@ -134,6 +134,9 @@ static void set_akc_callback(struct http_client_t *client, struct http_req_messa
 		}
 		strncpy(cloud_config.device_token, tmp->valuestring, AKC_TOKEN_LEN);
 	}
+
+	/* The mobile app gives us did and token, so the dtid is not secure */
+	cloud_config.is_secure_device_type = false;
 
 	SaveConfiguration();
 
@@ -396,6 +399,9 @@ static void put_akc_registration_callback(struct http_client_t *client, struct h
 	if (status == 200) {
 		memset(cloud_config.reg_id, 0, AKC_REG_ID_LEN + 1);
 		memset(cloud_config.reg_nonce, 0, AKC_REG_NONCE_LEN + 1);
+
+		/* The mobile app requests a secure registration, therefore the dtid is secure */
+		cloud_config.is_secure_device_type = true;
 		SaveConfiguration();
 
 		pthread_t tid;

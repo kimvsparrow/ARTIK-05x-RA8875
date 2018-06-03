@@ -62,32 +62,26 @@ struct ota_info {
 
 static const char akc_root_ca[] =
 	"-----BEGIN CERTIFICATE-----\r\n"
-	"MIIE0zCCA7ugAwIBAgIQGNrRniZ96LtKIVjNzGs7SjANBgkqhkiG9w0BAQUFADCB\r\n"
-	"yjELMAkGA1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMR8wHQYDVQQL\r\n"
-	"ExZWZXJpU2lnbiBUcnVzdCBOZXR3b3JrMTowOAYDVQQLEzEoYykgMjAwNiBWZXJp\r\n"
-	"U2lnbiwgSW5jLiAtIEZvciBhdXRob3JpemVkIHVzZSBvbmx5MUUwQwYDVQQDEzxW\r\n"
-	"ZXJpU2lnbiBDbGFzcyAzIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0\r\n"
-	"aG9yaXR5IC0gRzUwHhcNMDYxMTA4MDAwMDAwWhcNMzYwNzE2MjM1OTU5WjCByjEL\r\n"
-	"MAkGA1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMR8wHQYDVQQLExZW\r\n"
-	"ZXJpU2lnbiBUcnVzdCBOZXR3b3JrMTowOAYDVQQLEzEoYykgMjAwNiBWZXJpU2ln\r\n"
-	"biwgSW5jLiAtIEZvciBhdXRob3JpemVkIHVzZSBvbmx5MUUwQwYDVQQDEzxWZXJp\r\n"
-	"U2lnbiBDbGFzcyAzIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0aG9y\r\n"
-	"aXR5IC0gRzUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCvJAgIKXo1\r\n"
-	"nmAMqudLO07cfLw8RRy7K+D+KQL5VwijZIUVJ/XxrcgxiV0i6CqqpkKzj/i5Vbex\r\n"
-	"t0uz/o9+B1fs70PbZmIVYc9gDaTY3vjgw2IIPVQT60nKWVSFJuUrjxuf6/WhkcIz\r\n"
-	"SdhDY2pSS9KP6HBRTdGJaXvHcPaz3BJ023tdS1bTlr8Vd6Gw9KIl8q8ckmcY5fQG\r\n"
-	"BO+QueQA5N06tRn/Arr0PO7gi+s3i+z016zy9vA9r911kTMZHRxAy3QkGSGT2RT+\r\n"
-	"rCpSx4/VBEnkjWNHiDxpg8v+R70rfk/Fla4OndTRQ8Bnc+MUCH7lP59zuDMKz10/\r\n"
-	"NIeWiu5T6CUVAgMBAAGjgbIwga8wDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8E\r\n"
-	"BAMCAQYwbQYIKwYBBQUHAQwEYTBfoV2gWzBZMFcwVRYJaW1hZ2UvZ2lmMCEwHzAH\r\n"
-	"BgUrDgMCGgQUj+XTGoasjY5rw8+AatRIGCx7GS4wJRYjaHR0cDovL2xvZ28udmVy\r\n"
-	"aXNpZ24uY29tL3ZzbG9nby5naWYwHQYDVR0OBBYEFH/TZafC3ey78DAJ80M5+gKv\r\n"
-	"MzEzMA0GCSqGSIb3DQEBBQUAA4IBAQCTJEowX2LP2BqYLz3q3JktvXf2pXkiOOzE\r\n"
-	"p6B4Eq1iDkVwZMXnl2YtmAl+X6/WzChl8gGqCBpH3vn5fJJaCGkgDdk+bW48DW7Y\r\n"
-	"5gaRQBi5+MHt39tBquCWIMnNZBU4gcmU7qKEKQsTb47bDN0lAtukixlE0kF6BWlK\r\n"
-	"WE9gyn6CagsCqiUXObXbf+eEZSqVir2G3l6BFoMtEMze/aiCKm0oHw0LxOXnGiYZ\r\n"
-	"4fQRbxC1lfznQgUy286dUV4otp6F01vvpX1FQHKOtw5rDgb7MzVIcbidJ4vEZV8N\r\n"
-	"hnacRHr2lVz2XTIIM6RUthg/aFzyQkqFOFSDX9HoLPKsEdao7WNq\r\n"
+	"MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
+	"MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\r\n"
+	"d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD\r\n"
+	"QTAeFw0wNjExMTAwMDAwMDBaFw0zMTExMTAwMDAwMDBaMGExCzAJBgNVBAYTAlVT\r\n"
+	"MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j\r\n"
+	"b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IENBMIIBIjANBgkqhkiG\r\n"
+	"9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4jvhEXLeqKTTo1eqUKKPC3eQyaKl7hLOllsB\r\n"
+	"CSDMAZOnTjC3U/dDxGkAV53ijSLdhwZAAIEJzs4bg7/fzTtxRuLWZscFs3YnFo97\r\n"
+	"nh6Vfe63SKMI2tavegw5BmV/Sl0fvBf4q77uKNd0f3p4mVmFaG5cIzJLv07A6Fpt\r\n"
+	"43C/dxC//AH2hdmoRBBYMql1GNXRor5H4idq9Joz+EkIYIvUX7Q6hL+hqkpMfT7P\r\n"
+	"T19sdl6gSzeRntwi5m3OFBqOasv+zbMUZBfHWymeMr/y7vrTC0LUq7dBMtoM1O/4\r\n"
+	"gdW7jVg/tRvoSSiicNoxBN33shbyTApOB6jtSj1etX+jkMOvJwIDAQABo2MwYTAO\r\n"
+	"BgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUA95QNVbR\r\n"
+	"TLtm8KPiGxvDl7I90VUwHwYDVR0jBBgwFoAUA95QNVbRTLtm8KPiGxvDl7I90VUw\r\n"
+	"DQYJKoZIhvcNAQEFBQADggEBAMucN6pIExIK+t1EnE9SsPTfrgT1eXkIoyQY/Esr\r\n"
+	"hMAtudXH/vTBH1jLuG2cenTnmCmrEbXjcKChzUyImZOMkXDiqw8cvpOp/2PV5Adg\r\n"
+	"06O/nVsJ8dWO41P0jmP6P6fbtGbfYmbW0W5BjfIttep3Sp+dWOIrWcBAI+0tKIJF\r\n"
+	"PnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls\r\n"
+	"YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\r\n"
+	"CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\r\n"
 	"-----END CERTIFICATE-----\r\n";
 
 static int device_command(int argc, char *argv[]);
@@ -101,9 +95,8 @@ static int sdr_command(int argc, char *argv[]);
 static int dm_command(int argc, char *argv[]);
 
 static artik_websocket_handle ws_handle;
-static artik_lwm2m_config *g_dm_config;
-static artik_lwm2m_handle g_dm_client;
-static struct ota_info *g_dm_info;
+static artik_lwm2m_handle g_dm_client = NULL;
+static struct ota_info *g_dm_info = NULL;
 
 const struct command cloud_commands[] = {
 	{ "device", "device <token> <device id> [<properties>]", device_command },
@@ -138,6 +131,7 @@ static void websocket_rx_callback(void *user_data, void *result)
 			task_create("cloud_disconnect", SCHED_PRIORITY_DEFAULT, 4096, disconnect_command, NULL);
 		}
 
+		cJSON_Delete(msg);
 		free(result);
 	}
 }
@@ -400,7 +394,6 @@ static int connect_command(int argc, char *argv[])
 		goto exit;
 	}
 
-
 exit:
 	if (cloud)
 		artik_release_api_module(cloud);
@@ -651,14 +644,22 @@ static int download_firmware(int argc, char *argv[])
 		{ "User-Agent", "Artik Firmware Updater"}
 	};
 
-	g_dm_info = malloc(sizeof(struct ota_info));
-	memset(g_dm_info, 0, sizeof(struct ota_info));
-	g_dm_info->remaining_header_size = OTA_FIRMWARE_HEADER_SIZE;
-
 	if (!lwm2m) {
 		fprintf(stderr, "Failed to request LWM2M module\n");
 		return 1;
 	}
+
+	/* Only allocate if was not allocated before */
+	if (!g_dm_info) {
+		g_dm_info = malloc(sizeof(struct ota_info));
+		if (!g_dm_info) {
+			fprintf(stderr, "Failed to allocate memory\n");
+			return 1;
+		}
+	}
+
+	memset(g_dm_info, 0, sizeof(struct ota_info));
+	g_dm_info->remaining_header_size = OTA_FIRMWARE_HEADER_SIZE;
 
 	if (!http) {
 		lwm2m->client_write_resource(
@@ -791,6 +792,9 @@ static int dm_command(int argc, char *argv[])
 	int ret = 0;
 	artik_lwm2m_module *lwm2m = NULL;
 	artik_ssl_config *ssl_config = NULL;
+	artik_lwm2m_config dm_config;
+
+	memset(&dm_config, 0, sizeof(dm_config));
 
 	if (!strcmp(argv[3], "connect")) {
 
@@ -811,13 +815,6 @@ static int dm_command(int argc, char *argv[])
 			goto exit;
 		}
 
-		g_dm_config = zalloc(sizeof(artik_lwm2m_config));
-		if (!g_dm_config) {
-			fprintf(stderr, "Failed to allocate memory for DM config\n");
-			ret = -1;
-			goto exit;
-		}
-
 		ssl_config = zalloc(sizeof(artik_ssl_config));
 		if (!ssl_config) {
 			fprintf(stderr, "Failed to allocate memory for DM SSL config\n");
@@ -830,40 +827,38 @@ static int dm_command(int argc, char *argv[])
 		ssl_config->ca_cert.len = sizeof(akc_root_ca);
 		ssl_config->verify_cert = ssl_config->se_config.use_se ?
 			ARTIK_SSL_VERIFY_NONE : ARTIK_SSL_VERIFY_REQUIRED;
-		g_dm_config->ssl_config = ssl_config;
 
-		g_dm_config->server_id = 123;
-		g_dm_config->server_uri = ssl_config->se_config.use_se ?
+		dm_config.ssl_config = ssl_config;
+		dm_config.server_id = 123;
+		dm_config.server_uri = ssl_config->se_config.use_se ?
 				"coaps+tcp://coaps-api.artik.cloud:5689" :
 				"coaps://coaps-api.artik.cloud:5686";
-		g_dm_config->lifetime = 30;
-		g_dm_config->name = strndup(argv[5], UUID_MAX_LEN);
-		g_dm_config->tls_psk_identity = g_dm_config->name;
-		g_dm_config->tls_psk_key = strndup(argv[4], UUID_MAX_LEN);
-		g_dm_config->objects[ARTIK_LWM2M_OBJECT_DEVICE] =
+		dm_config.lifetime = 30;
+		dm_config.name = strndup(argv[5], UUID_MAX_LEN);
+		dm_config.tls_psk_identity = dm_config.name;
+		dm_config.tls_psk_key = strndup(argv[4], UUID_MAX_LEN);
+		dm_config.objects[ARTIK_LWM2M_OBJECT_DEVICE] =
 			lwm2m->create_device_object("Samsung", "ARTIK05x", "1234567890", "1.0",
 						    "1.0", "1.0", "A05x", 0, 5000, 1500, 100, 1000000, 200000,
 						    "Europe/Paris", "+01:00", "U");
-		if (!g_dm_config->objects[ARTIK_LWM2M_OBJECT_DEVICE]) {
+		if (!dm_config.objects[ARTIK_LWM2M_OBJECT_DEVICE]) {
 			fprintf(stderr, "Failed to allocate memory for object device.");
-			free(g_dm_config);
 			ret = -1;
 			goto exit;
 		}
-		g_dm_config->objects[ARTIK_LWM2M_OBJECT_FIRMWARE] = lwm2m->create_firmware_object(
-			false,
-			"Artik/TizenRT",
-			OTA_FIRMWARE_VERSION);
-		if (!g_dm_config->objects[ARTIK_LWM2M_OBJECT_FIRMWARE]) {
+
+		dm_config.objects[ARTIK_LWM2M_OBJECT_FIRMWARE] =
+			lwm2m->create_firmware_object(false, "Artik/TizenRT",
+					OTA_FIRMWARE_VERSION);
+		if (!dm_config.objects[ARTIK_LWM2M_OBJECT_FIRMWARE]) {
 			fprintf(stderr, "Failed to allocate memory for object firmware.");
 			ret = -1;
 			goto exit;
 		}
-		ret = lwm2m->client_request(&g_dm_client, g_dm_config);
+
+		ret = lwm2m->client_request(&g_dm_client, &dm_config);
 		if (ret != S_OK) {
 			fprintf(stderr, "Failed to request lwm2m handle (%d)\n", ret);
-			lwm2m->free_object(g_dm_config->objects[ARTIK_LWM2M_OBJECT_DEVICE]);
-			free(g_dm_config);
 			ret = -1;
 			goto exit;
 		}
@@ -880,17 +875,9 @@ static int dm_command(int argc, char *argv[])
 			fprintf(stderr, "Failed to connect to the DM server (%d)\n", ret);
 			lwm2m->client_release(g_dm_client);
 			g_dm_client = NULL;
-			lwm2m->free_object(g_dm_config->objects[ARTIK_LWM2M_OBJECT_DEVICE]);
-			free(g_dm_config);
 			ret = -1;
 			goto exit;
 		}
-
-		lwm2m->free_object(g_dm_config->objects[ARTIK_LWM2M_OBJECT_DEVICE]);
-		free(g_dm_config->name);
-		free(g_dm_config->tls_psk_key);
-		free(g_dm_config->ssl_config);
-		free(g_dm_config);
 	} else if (!strcmp(argv[3], "disconnect")) {
 
 		if (!g_dm_client) {
@@ -1000,6 +987,17 @@ static int dm_command(int argc, char *argv[])
 	}
 
 exit:
+	if (dm_config.objects[ARTIK_LWM2M_OBJECT_DEVICE])
+		lwm2m->free_object(dm_config.objects[ARTIK_LWM2M_OBJECT_DEVICE]);
+	if (dm_config.objects[ARTIK_LWM2M_OBJECT_FIRMWARE])
+		lwm2m->free_object(dm_config.objects[ARTIK_LWM2M_OBJECT_FIRMWARE]);
+	if (dm_config.name)
+		free(dm_config.name);
+	if (dm_config.tls_psk_key)
+		free(dm_config.tls_psk_key);
+	if (dm_config.ssl_config)
+		free(dm_config.ssl_config);
+
 	if (lwm2m)
 		artik_release_api_module(lwm2m);
 

@@ -20,7 +20,9 @@
 #include "hip.h"
 #include "mgt.h"
 #include "debug_scsc.h"
+#ifdef SLSI_ENABLE_UDI_NODE
 #include "udi.h"
+#endif
 #include "hydra.h"
 #include "t20_ops.h"
 #include "netif.h"
@@ -154,8 +156,9 @@ struct slsi_dev *slsi_dev_attach(struct scsc_mx *core, struct scsc_service_clien
 	memset(&sdev->chip_info_mib, 0xFF, sizeof(struct slsi_chip_info_mib));
 
 	sdev->scan_init_24g = true;
+#ifdef SLSI_ENABLE_UDI_NODE
 	slsi_log_clients_init(sdev);
-
+#endif
 	sdev->recovery_next_state = 0;
 	init_completion(&sdev->recovery_remove_completion);
 	init_completion(&sdev->recovery_stop_completion);
@@ -178,10 +181,12 @@ struct slsi_dev *slsi_dev_attach(struct scsc_mx *core, struct scsc_service_clien
 		goto err_netif_init;
 	}
 
+#ifdef SLSI_ENABLE_UDI_NODE
 	if (slsi_udi_node_init(sdev) != 0) {
 		SLSI_ERR(sdev, "failed to init UDI\n");
 		goto err_hip_init;
 	}
+#endif
 
 	/* update regulatory domain */
 	slsi_regd_init(sdev);
@@ -222,8 +227,10 @@ err_netif_registered:
 	slsi_netif_remove(sdev, sdev->netdev[SLSI_NET_INDEX_P2P]);
 #endif
 	slsi_netif_remove(sdev, sdev->netdev[SLSI_NET_INDEX_WLAN]);
+#ifdef SLSI_ENABLE_UDI_NODE
 	slsi_udi_node_deinit(sdev);
 err_hip_init:
+#endif
 	slsi_hip_deinit(sdev);
 
 err_netif_init:
@@ -251,10 +258,12 @@ void slsi_dev_detach(struct slsi_dev *sdev)
 	SLSI_DBG2(sdev, SLSI_INIT_DEINIT, "Unregister netif\n");
 	slsi_netif_remove_all(sdev);
 
+#ifdef SLSI_ENABLE_UDI_NODE
 	SLSI_DBG2(sdev, SLSI_INIT_DEINIT, "De-initialise the UDI\n");
 	slsi_log_clients_terminate(sdev);
 
 	slsi_udi_node_deinit(sdev);
+#endif
 
 	SLSI_DBG2(sdev, SLSI_INIT_DEINIT, "De-initialise Hip\n");
 	slsi_hip_deinit(sdev);
@@ -284,9 +293,12 @@ int slsi_dev_load(void)
 	SLSI_INFO_NODEV("--- WLANLITE mode ---\n");
 #endif
 
+#ifdef SLSI_ENABLE_UDI_NODE
 	if (slsi_udi_init()) {
 		SLSI_INFO_NODEV("Failed to init udi - continuing\n");
 	}
+#endif
+
 	if (mx_mmap_init()) {
 		SLSI_INFO_NODEV("Failed to init gdb_transport - continuing\n");
 	}
@@ -321,7 +333,10 @@ void slsi_dev_unload(void)
 
 	slsi_sm_service_driver_unregister();
 	mx_mmap_deinit();
+
+#ifdef SLSI_ENABLE_UDI_NODE
 	slsi_udi_deinit();
+#endif
 
 	SLSI_INFO_NODEV("--- Maxwell Wi-Fi driver unloaded successfully ---\n");
 }

@@ -53,7 +53,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <time.h>
 #include <stdio.h>
 
 static int rand_initialized = false;
@@ -67,7 +67,8 @@ lwm2m_context_t * lwm2m_init(void * userData, const char * token)
     {
         memset(contextP, 0, sizeof(lwm2m_context_t));
         contextP->userData = userData;
-        contextP->token = strdup(token);
+        contextP->token = lwm2m_malloc(strlen(token)+1);
+        strcpy(contextP->token, token);
         if (!contextP->token) {
             free(contextP);
             return NULL;
@@ -354,11 +355,8 @@ int lwm2m_remove_object(lwm2m_context_t * contextP,
 int lwm2m_step(lwm2m_context_t * contextP,
                time_t * timeoutP)
 {
-    time_t tv_sec;
     int result;
-
-    tv_sec = lwm2m_gettime();
-    if (tv_sec < 0) return COAP_500_INTERNAL_SERVER_ERROR;
+    time_t tv_sec = lwm2m_gettime();
 
 #ifdef LWM2M_CLIENT_MODE
     // state can also be modified in bootstrap_handleCommand().
@@ -415,7 +413,7 @@ next_step:
         break;
 #endif
     case STATE_REGISTER_REQUIRED:
-        result = registration_start(contextP);
+        result = registration_start(contextP, timeoutP);
         if (COAP_NO_ERROR != result) return result;
         contextP->state = STATE_REGISTERING;
         break;

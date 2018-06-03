@@ -51,8 +51,10 @@ struct Lwm2mConfig {
 
 extern struct Lwm2mConfig lwm2m_config;
 
-artik_error StartLwm2m(bool start);
+typedef void (*on_lwm2m_start_cb)(void);
+artik_error StartLwm2m(bool start, on_lwm2m_start_cb);
 void Lwm2mResetConfig(bool force);
+
 /*
  * WiFi related exports
  */
@@ -92,17 +94,18 @@ struct ArtikCloudConfig {
 	char device_type_id[AKC_DTID_LEN + 1];
 	char reg_id[AKC_REG_ID_LEN + 1];
 	char reg_nonce[AKC_REG_NONCE_LEN + 1];
+	bool is_secure_device_type;
 };
 
 extern struct ArtikCloudConfig cloud_config;
-extern bool cloud_secure_dt;
+typedef void (*on_ws_start_cb)(void);
 
 void CloudResetConfig(bool reset_dtid);
-artik_error StartCloudWebsocket(bool start);
+artik_error StartCloudWebsocket(bool start, on_ws_start_cb cb);
 artik_error SendMessageToCloud(char *message);
 int StartSDRRegistration(char **resp);
 int CompleteSDRRegistration(char **resp);
-bool CloudIsSecureDeviceType(const char *dtid);
+bool CloudIsSecureDeviceType(void);
 
 /*
  * Web server related exports

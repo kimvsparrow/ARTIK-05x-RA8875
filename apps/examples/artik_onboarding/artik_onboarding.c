@@ -37,10 +37,10 @@ pid_t onboarding_service_pid = -1;
 
 static void StopOnboardingService(void)
 {
-	StopWifi();
 	StartWebServer(false, API_SET_WIFI | API_SET_CLOUD);
-	StartCloudWebsocket(false);
-	StartLwm2m(false);
+	StartCloudWebsocket(false, NULL);
+	StartLwm2m(false, NULL);
+	StopWifi();
 
 	printf("ARTIK Onboarding Service stopped\n");
 	current_service_state = STATE_IDLE;
@@ -53,17 +53,14 @@ static pthread_addr_t start_onboarding(pthread_addr_t arg)
 
 	current_service_state = STATE_ONBOARDING;
 
-	/* Check if AKC device type requires secure communication */
-	cloud_secure_dt = CloudIsSecureDeviceType(cloud_config.device_type_id);
-
 	/* If we already have Wifi credentials, try to connect to the hotspot */
 	if (strlen(wifi_config.ssid) > 0) {
 		if (StartStationConnection(true) == S_OK) {
 			/* Check if we have valid ARTIK Cloud credentials */
 			if ((strlen(cloud_config.device_id) == AKC_DID_LEN) &&
 			    (strlen(cloud_config.device_token) == AKC_TOKEN_LEN)) {
-				if (StartCloudWebsocket(true) == S_OK) {
-					if (StartLwm2m(true) == S_OK) {
+				if (StartCloudWebsocket(true, NULL) == S_OK) {
+					if (StartLwm2m(true, NULL) == S_OK) {
 						printf("ARTIK Cloud connection started\n");
 						goto exit;
 					} else {

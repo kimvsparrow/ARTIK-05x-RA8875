@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- * Copyright 2016 Samsung Electronics All Rights Reserved.
+ * Copyright 2017 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,10 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
+#if defined(MBEDTLS_OCF_PATCH) && defined(MBEDTLS_HAVE_WINSOCK2)
+#include <winsock2.h>
+#endif
+
 #include "ssl.h"
 
 #include <stddef.h>
@@ -65,8 +69,23 @@
 
 #define MBEDTLS_NET_LISTEN_BACKLOG         10 /**< The backlog that listen() should use. */
 
-#define MBEDTLS_NET_PROTO_TCP 0	/**< The TCP transport protocol */
-#define MBEDTLS_NET_PROTO_UDP 1	/**< The UDP transport protocol */
+#define MBEDTLS_NET_PROTO_TCP 0 /**< The TCP transport protocol */
+#define MBEDTLS_NET_PROTO_UDP 1 /**< The UDP transport protocol */
+
+#if defined(MBEDTLS_OCF_PATCH)
+/**
+ * Socket types and invalid values differ between platforms.
+ */
+#if defined(MBEDTLS_HAVE_WINSOCK2)
+#define MBEDTLS_INVALID_SOCKET INVALID_SOCKET
+
+typedef SOCKET mbedtls_socket;
+#else
+#define MBEDTLS_INVALID_SOCKET -1
+
+typedef int mbedtls_socket;
+#endif
+#endif /* MBEDTLS_OCF_PATCH */
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,9 +98,15 @@ extern "C" {
  * (eg two file descriptors for combined IPv4 + IPv6 support, or additional
  * structures for hand-made UDP demultiplexing).
  */
-typedef struct {
-	int fd;			/**< The underlying file descriptor                 */
-} mbedtls_net_context;
+typedef struct
+{
+#if defined(MBEDTLS_OCF_PATCH)
+    mbedtls_socket fd;  /**< The underlying file descriptor                 */
+#else
+    int fd;             /**< The underlying file descriptor                 */
+#endif
+}
+mbedtls_net_context;
 
 /**
  * \brief          Initialize a context
@@ -89,7 +114,7 @@ typedef struct {
  *
  * \param ctx      Context to initialize
  */
-void mbedtls_net_init(mbedtls_net_context *ctx);
+void mbedtls_net_init( mbedtls_net_context *ctx );
 
 /**
  * \brief          Initiate a connection with host:port in the given protocol
@@ -106,7 +131,7 @@ void mbedtls_net_init(mbedtls_net_context *ctx);
  *
  * \note           Sets the socket in connected mode even with UDP.
  */
-int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host, const char *port, int proto);
+int mbedtls_net_connect( mbedtls_net_context *ctx, const char *host, const char *port, int proto );
 
 /**
  * \brief          Create a receiving socket on bind_ip:port in the chosen
@@ -125,7 +150,7 @@ int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host, const char *
  * \note           Regardless of the protocol, opens the sockets and binds it.
  *                 In addition, make the socket listening if protocol is TCP.
  */
-int mbedtls_net_bind(mbedtls_net_context *ctx, const char *bind_ip, const char *port, int proto);
+int mbedtls_net_bind( mbedtls_net_context *ctx, const char *bind_ip, const char *port, int proto );
 
 /**
  * \brief           Accept a connection from a remote client
@@ -142,7 +167,9 @@ int mbedtls_net_bind(mbedtls_net_context *ctx, const char *bind_ip, const char *
  *                  MBEDTLS_ERR_SSL_WANT_READ if bind_fd was set to
  *                  non-blocking and accept() would block.
  */
-int mbedtls_net_accept(mbedtls_net_context *bind_ctx, mbedtls_net_context *client_ctx, void *client_ip, size_t buf_size, size_t *ip_len);
+int mbedtls_net_accept( mbedtls_net_context *bind_ctx,
+                        mbedtls_net_context *client_ctx,
+                        void *client_ip, size_t buf_size, size_t *ip_len );
 
 /**
  * \brief          Set the socket blocking
@@ -151,7 +178,7 @@ int mbedtls_net_accept(mbedtls_net_context *bind_ctx, mbedtls_net_context *clien
  *
  * \return         0 if successful, or a non-zero error code
  */
-int mbedtls_net_set_block(mbedtls_net_context *ctx);
+int mbedtls_net_set_block( mbedtls_net_context *ctx );
 
 /**
  * \brief          Set the socket non-blocking
@@ -160,7 +187,7 @@ int mbedtls_net_set_block(mbedtls_net_context *ctx);
  *
  * \return         0 if successful, or a non-zero error code
  */
-int mbedtls_net_set_nonblock(mbedtls_net_context *ctx);
+int mbedtls_net_set_nonblock( mbedtls_net_context *ctx );
 
 /**
  * \brief          Portable usleep helper
@@ -170,7 +197,7 @@ int mbedtls_net_set_nonblock(mbedtls_net_context *ctx);
  * \note           Real amount of time slept will not be less than
  *                 select()'s timeout granularity (typically, 10ms).
  */
-void mbedtls_net_usleep(unsigned long usec);
+void mbedtls_net_usleep( unsigned long usec );
 
 /**
  * \brief          Read at most 'len' characters. If no error occurs,
@@ -184,7 +211,7 @@ void mbedtls_net_usleep(unsigned long usec);
  *                 or a non-zero error code; with a non-blocking socket,
  *                 MBEDTLS_ERR_SSL_WANT_READ indicates read() would block.
  */
-int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len);
+int mbedtls_net_recv( void *ctx, unsigned char *buf, size_t len );
 
 /**
  * \brief          Write at most 'len' characters. If no error occurs,
@@ -198,7 +225,7 @@ int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len);
  *                 or a non-zero error code; with a non-blocking socket,
  *                 MBEDTLS_ERR_SSL_WANT_WRITE indicates write() would block.
  */
-int mbedtls_net_send(void *ctx, const unsigned char *buf, size_t len);
+int mbedtls_net_send( void *ctx, const unsigned char *buf, size_t len );
 
 /**
  * \brief          Read at most 'len' characters, blocking for at most
@@ -221,16 +248,18 @@ int mbedtls_net_send(void *ctx, const unsigned char *buf, size_t len);
  *                 non-blocking. Handling timeouts with non-blocking reads
  *                 requires a different strategy.
  */
-int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t timeout);
+int mbedtls_net_recv_timeout( void *ctx, unsigned char *buf, size_t len,
+                      uint32_t timeout );
 
 /**
  * \brief          Gracefully shutdown the connection and free associated data
  *
  * \param ctx      The context to free
  */
-void mbedtls_net_free(mbedtls_net_context *ctx);
+void mbedtls_net_free( mbedtls_net_context *ctx );
 
 #ifdef __cplusplus
 }
 #endif
-#endif							/* net_sockets.h */
+
+#endif /* net_sockets.h */

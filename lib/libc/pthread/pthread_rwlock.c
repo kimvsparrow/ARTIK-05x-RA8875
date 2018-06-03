@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- * Copyright 2016 Samsung Electronics All Rights Reserved.
+ * Copyright 2017 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
  *
  ****************************************************************************/
 /****************************************************************************
- * kernel/pthread/pthread_condinit.c
+ * lib/libc/pthread/pthread_rwlock.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Mark Schulte. All rights reserved.
+ *   Author: Mark Schulte <mark@mjs.pw>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,57 +56,82 @@
 
 #include <tinyara/config.h>
 
+#include <stdint.h>
 #include <pthread.h>
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
-#include "pthread/pthread.h"
-
-/****************************************************************************
- * Global Functions
- ****************************************************************************/
+#include <tinyara/semaphore.h>
 
 /****************************************************************************
- * Name: pthread_cond_init
- *
- * Description:
- *   A thread can create condition variables.
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   None
- *
- * Assumptions:
- *
+ * Public Functions
  ****************************************************************************/
 
-int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *attr)
+int pthread_rwlock_init(FAR pthread_rwlock_t *lock, FAR const pthread_rwlockattr_t *attr)
 {
-	int ret = OK;
+	int err;
 
-	svdbg("cond=0x%p attr=0x%p\n", cond, attr);
-
-	if (cond == NULL) {
-		ret = EINVAL;
+	if (lock == NULL) {
+		return EINVAL;
 	}
 
-	/*
-	 * Initialize the semaphore contained in the condition structure
-	 * with initial count = 0
-	 */
+	if (attr != NULL) {
+		return ENOSYS;
+	}
 
-	else if (sem_init((sem_t *)&cond->sem, 0, 0) != OK) {
-		ret = EINVAL;
+	lock->num_readers = 0;
+	lock->num_writers = 0;
+	lock->write_in_progress = false;
+
+	err = pthread_cond_init(&lock->cv, NULL);
+	if (err != 0) {
+		return err;
+	}
+
+	err = pthread_mutex_init(&lock->lock, NULL);
+	if (err != 0) {
+		pthread_cond_destroy(&lock->cv);
+		return err;
+	}
+
+	return err;
+}
+
+int pthread_rwlock_destroy(FAR pthread_rwlock_t *lock)
+{
+	int cond_err = pthread_cond_destroy(&lock->cv);
+	int mutex_err = pthread_mutex_destroy(&lock->lock);
+
+	if (mutex_err) {
+		return mutex_err;
+	}
+
+	return cond_err;
+}
+
+int pthread_rwlock_unlock(FAR pthread_rwlock_t *rw_lock)
+{
+	int err;
+
+	err = pthread_mutex_lock(&rw_lock->lock);
+	if (err != 0) {
+		return err;
+	}
+
+	if (rw_lock->num_readers > 0) {
+		rw_lock->num_readers--;
+
+		if (rw_lock->num_readers == 0) {
+			err = pthread_cond_broadcast(&rw_lock->cv);
+		}
+	} else if (rw_lock->write_in_progress) {
+		rw_lock->write_in_progress = false;
+
+		err = pthread_cond_broadcast(&rw_lock->cv);
 	} else {
-		/*
-		 * The contained semaphore is used for signaling and, hence,
-		 * should not have priority inheritance enabled.
-		 */
-		sem_setprotocol(&cond->sem, SEM_PRIO_NONE);
+		err = EINVAL;
 	}
 
-	svdbg("Returning %d\n", ret);
-	return ret;
+	pthread_mutex_unlock(&rw_lock->lock);
+	return err;
 }

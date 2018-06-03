@@ -1291,8 +1291,8 @@ void slsi_callback_thread_handler(void *param)
 			EPRINT("receiver_thread: ERROR mq_close failed\n");
 		} else {
 			DPRINT("Closed g_recv_cbmqfd mqueue\n");
-			g_recv_cbmqfd = NULL;
 		}
+		g_recv_cbmqfd = NULL;
 	}
 
 	VPRINT("SLSI_API pthread_exit %d \n", g_callback_thread);
@@ -1643,6 +1643,16 @@ void slsi_monitor_thread_handler(void *param)
 #endif
 		}
 	}
+
+	/* Close callback sender mqueue */
+	if (g_send_cbmqfd) {
+		if (mq_close(g_send_cbmqfd) < 0) {
+			EPRINT("close mqueue failed: %d\n", errno);
+		} else {
+			DPRINT("Closed g_send_cbmqfd mqueue \n");
+		}
+	}
+	g_send_cbmqfd = NULL;
 
 	VPRINT("SLSI_API pthread_exit %d \n", g_monitoring_thread);
 	pthread_detach(g_monitoring_thread);
@@ -3966,19 +3976,19 @@ int8_t WiFiGetChannel(int8_t *channel)
 
 int8_t WiFiIsConnected(uint8_t *ret, slsi_reason_t *details)
 {
-	ENTER_CRITICAL;
 	int8_t result = SLSI_STATUS_NOT_CONNECTED;
 	uint8_t count = 0;
 	if (details != NULL) {
 		memset(details, 0, sizeof(slsi_reason_t));
 	}
-
 	if (g_state == SLSI_WIFIAPI_STATE_STA_CONNECTED) {
+		ENTER_CRITICAL;
 		count = 1;
 		result = SLSI_STATUS_SUCCESS;
 		if (details != NULL) {
 			result = slsi_check_status(details->ssid, &details->ssid_len, details->bssid);
 		}
+		LEAVE_CRITICAL;
 	} else if (g_state == SLSI_WIFIAPI_STATE_AP_CONNECTED) {
 		count = g_num_sta_connected;
 		result = SLSI_STATUS_SUCCESS;
@@ -3986,8 +3996,9 @@ int8_t WiFiIsConnected(uint8_t *ret, slsi_reason_t *details)
 		result = SLSI_STATUS_NOT_STARTED;
 	}
 
+	VPRINT("WiFiIsConnected result %d (9 = not connected) count %d\n", result, count);
+
 	*ret = count;
-	LEAVE_CRITICAL;
 	return result;
 }
 

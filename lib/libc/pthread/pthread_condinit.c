@@ -16,7 +16,7 @@
  *
  ****************************************************************************/
 /****************************************************************************
- * kernel/pthread/pthread_conddestroy.c
+ * libc/pthread/pthread_condinit.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,17 +59,16 @@
 #include <pthread.h>
 #include <debug.h>
 #include <errno.h>
-#include "pthread/pthread.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_destroy
+ * Name: pthread_cond_init
  *
  * Description:
- *   A thread can delete condition variables.
+ *   A thread can create condition variables.
  *
  * Parameters:
  *   None
@@ -81,20 +80,29 @@
  *
  ****************************************************************************/
 
-int pthread_cond_destroy(FAR pthread_cond_t *cond)
+int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *attr)
 {
 	int ret = OK;
 
-	svdbg("cond=0x%p\n", cond);
+	svdbg("cond=0x%p attr=0x%p\n", cond, attr);
 
-	if (!cond) {
+	if (cond == NULL) {
 		ret = EINVAL;
 	}
 
-	/* Destroy the semaphore contained in the structure */
+	/*
+	 * Initialize the semaphore contained in the condition structure
+	 * with initial count = 0
+	 */
 
-	else if (sem_destroy((sem_t *)&cond->sem) != OK) {
+	else if (sem_init((sem_t *)&cond->sem, 0, 0) != OK) {
 		ret = EINVAL;
+	} else {
+		/*
+		 * The contained semaphore is used for signaling and, hence,
+		 * should not have priority inheritance enabled.
+		 */
+		sem_setprotocol(&cond->sem, SEM_PRIO_NONE);
 	}
 
 	svdbg("Returning %d\n", ret);

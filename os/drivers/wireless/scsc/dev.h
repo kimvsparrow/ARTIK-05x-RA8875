@@ -35,8 +35,9 @@
 #include "fapi.h"
 #include "utils_scsc.h"
 #include "hip.h"
+#ifdef SLSI_ENABLE_UDI_NODE
 #include "log_clients.h"
-#include "unifiio.h"
+#endif
 #include "scsc_wifi_fcq.h"
 #include "scsc_wifi_cm_if.h"
 #include "hip4.h"
@@ -365,7 +366,6 @@ struct slsi_vif_ap {
 	bool non_ht_bss_present;	/* Non HT BSS observed in HT20 OBSS scan */
 #endif
 	struct scsc_wifi_fcq_data_qset group_data_qs;
-	u32 cipher;
 };
 
 struct netdev_vif {
@@ -572,6 +572,7 @@ struct slsi_dev {
 	/* Locking used to control Starting and stopping the chip */
 	pthread_mutex_t start_stop_mutex;
 
+#ifdef SLSI_ENABLE_UDI_NODE
 	/* UDI Logging */
 	struct slsi_log_clients log_clients;
 	void *uf_cdev;
@@ -579,6 +580,7 @@ struct slsi_dev {
 	/* ProcFS */
 	int procfs_instance;
 	struct proc_dir_entry *procfs_dir;
+#endif
 
 	/* Configuration */
 	u8 hw_addr[ETH_ALEN];
